@@ -9,7 +9,7 @@ import { Modal } from '../ui';
 export function AuthModal() {
   const { modal, closeModal } = useStorefront();
   const open = modal === 'auth';
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resendConfirmation } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -17,6 +17,7 @@ export function AuthModal() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState({
@@ -31,16 +32,31 @@ export function AuthModal() {
     event.preventDefault();
     setError(null);
     setNotice(null);
+    setNeedsConfirmation(false);
     setBusy(true);
     const { error: authError } = await signIn(loginForm.email, loginForm.password);
     setBusy(false);
     if (authError) {
       setError(authError);
+      if (authError.includes('not confirmed')) setNeedsConfirmation(true);
       return;
     }
     showToast('Welcome back!', 'success');
     closeModal();
     navigate('/account');
+  };
+
+  const handleResend = async () => {
+    setBusy(true);
+    const resendError = await resendConfirmation(loginForm.email);
+    setBusy(false);
+    if (resendError) {
+      setError(resendError);
+      return;
+    }
+    setError(null);
+    setNeedsConfirmation(false);
+    setNotice('Confirmation email sent — please check your inbox (and spam folder).');
   };
 
   const handleRegister = async (event: FormEvent) => {
@@ -109,6 +125,16 @@ export function AuthModal() {
           </form>
           {notice && <p className="text-emerald-400 text-sm text-center mt-2">{notice}</p>}
           {error && <p className="text-red-400 text-sm text-center mt-2">{error}</p>}
+          {needsConfirmation && (
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={busy}
+              className="block mx-auto mt-2 text-xs text-blue-400 hover:text-blue-300 underline"
+            >
+              Resend confirmation email
+            </button>
+          )}
           <p className="text-center text-sm text-gray-400 mt-4">
             Don't have an account?{' '}
             <button

@@ -32,6 +32,8 @@ interface AuthContextValue {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (input: SignUpInput) => Promise<AuthResult>;
+  /** Re-send the signup confirmation email (for Option-B confirmation flow). */
+  resendConfirmation: (email: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   updateProfile: (updates: {
     full_name?: string;
@@ -135,6 +137,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null, needsEmailConfirmation };
   }, []);
 
+  const resendConfirmation = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    return error ? error.message : null;
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
@@ -166,11 +177,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       signIn,
       signUp,
+      resendConfirmation,
       signOut,
       updateProfile,
       refreshProfile,
     }),
-    [session, profile, loading, signIn, signUp, signOut, updateProfile, refreshProfile]
+    [session, profile, loading, signIn, signUp, resendConfirmation, signOut, updateProfile, refreshProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
