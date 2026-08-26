@@ -32,10 +32,10 @@ const ICONS: Record<ToastType, typeof Info> = {
 };
 
 const COLORS: Record<ToastType, string> = {
-  success: 'border-emerald-500/40 text-emerald-300',
-  error: 'border-red-500/40 text-red-300',
-  info: 'border-blue-500/40 text-blue-300',
-  warning: 'border-amber-500/40 text-amber-300',
+  success: 'border-emerald-500/40 text-emerald-700 dark:text-emerald-300',
+  error: 'border-red-500/40 text-red-700 dark:text-red-300',
+  info: 'border-blue-500/40 text-brand-300 dark:text-blue-300',
+  warning: 'border-amber-500/40 text-amber-700 dark:text-amber-300',
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -64,7 +64,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               role="status"
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
-              <span className="text-white">{toast.message}</span>
+              <span className="text-gray-900 dark:text-white">{toast.message}</span>
             </div>
           );
         })}

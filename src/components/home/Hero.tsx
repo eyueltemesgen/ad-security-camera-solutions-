@@ -53,7 +53,7 @@ export function Hero() {
           <h1 className={`text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.1] ${mounted ? 'animate-fade-up' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
             <span className="text-gradient-animate">Securing What</span>
             <br />
-            <span className="text-white dark:text-white">Matters Most</span>
+            <span className="text-gray-900 dark:text-white">Matters Most</span>
           </h1>
 
           <p className={`text-lg max-w-xl leading-relaxed ${mounted ? 'animate-fade-up' : 'opacity-0'}`} style={{ animationDelay: '0.2s', color: 'var(--text-secondary)' }}>

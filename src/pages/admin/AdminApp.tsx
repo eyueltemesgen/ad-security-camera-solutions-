@@ -187,7 +187,7 @@ function AdminLogin() {
           </div>
           <div className="text-center mt-3">
             <div className="text-2xl font-extrabold">
-              <span className="text-gradient">AD</span> <span className="text-white">Security</span>
+              <span className="text-gradient">AD</span> <span className="text-gray-900 dark:text-white">Security</span>
             </div>
             <div className="text-[9px] text-gray-500 uppercase tracking-[2.5px]">
               Camera Solutions

@@ -83,7 +83,7 @@ export function CheckoutModal() {
           <h2 className="text-2xl font-bold mb-2">Order Placed!</h2>
           <p className="text-gray-400 mb-1">
             Order number:{' '}
-            <span className="text-white font-semibold">{confirmed.order_number}</span>
+            <span className="text-gray-900 dark:text-white font-semibold">{confirmed.order_number}</span>
           </p>
           <p className="text-gray-400 text-sm mb-6">
             Payment is <span className="text-yellow-400">pending</span> — we'll confirm your{' '}

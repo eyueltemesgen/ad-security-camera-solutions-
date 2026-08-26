@@ -5,15 +5,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        night: '#0b0e14',
-        panel: '#0f131c',
-        deep: '#080b10',
-        card: '#141b28',
+        night: '#f5f3eb',
+        panel: '#ffffff',
+        deep: '#eceade',
+        card: '#ffffff',
         brand: {
-          300: '#7aa9ff',
-          400: '#3b7bff',
-          500: '#1a5bff',
-          700: '#0a3bb5',
+          300: '#2e6b4f',
+          400: '#1f5740',
+          500: '#1b4d2e',
+          700: '#123a21',
         },
       },
       fontFamily: {
