@@ -13,6 +13,23 @@ alter table public.notifications     enable row level security;
 alter table public.contact_messages  enable row level security;
 alter table public.site_settings     enable row level security;
 
+-- Idempotent: drop any existing AD policies so this script can be re-run
+do $$
+declare
+  pol record;
+begin
+  for pol in
+    select schemaname, tablename, policyname
+    from pg_policies
+    where schemaname = 'public'
+      and policyname like any (array['profiles\_%', 'product\_categories\_%', 'products\_%',
+        'wishlist\_%', 'orders\_%', 'order\_items\_%', 'service\_requests\_%',
+        'notifications\_%', 'contact\_messages\_%', 'site\_settings\_%'])
+  loop
+    execute format('drop policy if exists %I on %I.%I', pol.policyname, pol.schemaname, pol.tablename);
+  end loop;
+end $$;
+
 -- ----------------------------------------------------------------------------
 -- profiles
 -- ----------------------------------------------------------------------------

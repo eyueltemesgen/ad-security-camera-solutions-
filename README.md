@@ -26,17 +26,26 @@ Build: `npm run build` • Preview: `npm run preview`
 
 ## Supabase Setup
 
+**Fastest path (no CLI needed):**
+
 1. Create a project at [supabase.com](https://supabase.com)
-2. Run the SQL in `supabase/migrations/` via the Supabase CLI or SQL editor:
-   - `20260826000001_initial_schema.sql` — tables, indexes, `place_order` RPC, triggers
-   - `20260826000002_rls_policies.sql` — Row Level Security for every table
-   - `20260826000003_storage.sql` — buckets (`product-images`, `avatars`, `company-assets`) + policies
-   - `20260826000004_seed.sql` — starter categories + site settings
-   - `20260826000005_realtime.sql` — publication for notifications/orders
-3. Create an **admin user** (App has an "ADM" role for admins):
-   - In Supabase Auth: create a user, then run: `update public.profiles set role = 'admin' where email = '<you@email>';`
-4. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env` (see `.env.example`)
-5. Restart the dev server
+2. Open **SQL Editor** in the Supabase dashboard → **New query**
+3. Paste the entire contents of `supabase/setup/all_migrations.sql` and click **Run**
+   (this single file creates all tables, RLS policies, storage buckets, seed data, and refreshes the API schema cache)
+4. Create an **admin user**: register through the app (confirm the email), then run in SQL Editor:
+   ```sql
+   update public.profiles set role = 'admin' where email = '<you@email>';
+   ```
+5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env` (see `.env.example`) and in Vercel env vars
+
+**Errors like "Could not find the table 'public.orders' in the schema cache"?** That means step 3 was skipped (or run on the wrong project). If you already ran the SQL and still see it, run `notify pgrst, 'reload schema';` in the SQL Editor to force a cache refresh.
+
+**Alternative — individual migration files** (for Supabase CLI or manual tracking), in order:
+- `20260826000001_initial_schema.sql` — tables, indexes, `place_order` RPC, triggers
+- `20260826000002_rls_policies.sql` — Row Level Security for every table
+- `20260826000003_storage.sql` — buckets (`product-images`, `avatars`, `company-assets`) + policies
+- `20260826000004_seed.sql` — starter categories + site settings
+- `20260826000005_realtime.sql` — publication for notifications/orders
 
 ## Vercel Deployment
 

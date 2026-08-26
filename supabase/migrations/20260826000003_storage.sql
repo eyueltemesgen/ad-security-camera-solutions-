@@ -9,6 +9,20 @@ values
   ('company-assets', 'company-assets', true)
 on conflict (id) do nothing;
 
+-- Idempotent: drop existing AD storage policies so this script can be re-run
+do $$
+declare
+  pol record;
+begin
+  for pol in
+    select policyname
+    from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname like 'ad\_%'
+  loop
+    execute format('drop policy if exists %I on storage.objects', pol.policyname);
+  end loop;
+end $$;
+
 -- Public read access to all three buckets
 create policy "ad_public_read"
   on storage.objects for select
