@@ -101,9 +101,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [loadProfile]);
 
+  const notConfigured = (): AuthResult => ({
+    error:
+      'Backend is not configured yet — VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are missing. Contact the site administrator.',
+  });
+
   const signIn = useCallback(async (email: string, password: string): Promise<AuthResult> => {
+    if (!isSupabaseConfigured) return notConfigured();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (!error) return { error: null };
+    if (error.message.toLowerCase().includes('failed to fetch')) {
+      return {
+        error:
+          'Cannot reach the Supabase server — check your internet connection, and that VITE_SUPABASE_URL is correct and the Supabase project is not paused.',
+      };
+    }
     // Map common Supabase errors to actionable messages
     if (error.message.includes('Email not confirmed')) {
       return {
@@ -118,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = useCallback(async (input: SignUpInput): Promise<AuthResult> => {
+    if (!isSupabaseConfigured) return notConfigured();
     const { data, error } = await supabase.auth.signUp({
       email: input.email,
       password: input.password,
@@ -138,6 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resendConfirmation = useCallback(async (email: string) => {
+    if (!isSupabaseConfigured) return notConfigured().error;
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email,
