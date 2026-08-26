@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AD Security · Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
+    <style>
+        /* ----- base ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0b0e14;
+            color: #f0f4ff;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .glass-card {
+            background: rgba(20, 27, 40, 0.55);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+            transition: all 0.35s;
+        }
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 48px -16px rgba(26, 91, 255, 0.2);
+            border-color: rgba(26, 91, 255, 0.2);
+        }
+
+        /* ----- buttons ----- */
+        .btn-primary {
+            background: linear-gradient(145deg, #1a5bff, #0a3bb5);
+            transition: all 0.25s;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(26, 91, 255, 0.25);
+        }
+        .btn-primary:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 32px rgba(26, 91, 255, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(145deg, #10b981, #059669);
+            transition: all 0.25s;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+        }
+        .btn-success:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            transition: all 0.25s;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.25);
+        }
+        .btn-danger:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 32px rgba(239, 68, 68, 0.4);
+        }
+        .btn-warning {
+            background: linear-gradient(145deg, #f59e0b, #d97706);
+            transition: all 0.25s;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+        }
+        .btn-warning:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 32px rgba(245, 158, 11, 0.4);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.25s;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #1a5bff;
+        }
+        .btn-purple {
+            background: linear-gradient(145deg, #8b5cf6, #6d28d9);
+            transition: all 0.25s;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25);
+        }
+        .btn-purple:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #7aa9ff, #3b7bff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .admin-stat {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+        .admin-stat:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(26, 91, 255, 0.2);
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #1a5bff;
+            color: white;
+        }
+        .tab-inactive {
+            color: #9ca3af;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-inactive:hover {
+            color: #e5e7eb;
+        }
+
+        .status-badge {
+            padding: 0.2rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .status-pending {
+            background: #f59e0b20;
+            color: #f59e0b;
+        }
+        .status-confirmed {
+            background: #3b82f620;
+            color: #3b82f6;
+        }
+        .status-processing {
+            background: #8b5cf620;
+            color: #8b5cf6;
+        }
+        .status-shipped {
+            background: #06b6d420;
+            color: #06b6d4;
+        }
+        .status-delivered {
+            background: #10b98120;
+            color: #10b981;
+        }
+        .status-cancelled {
+            background: #ef444420;
+            color: #ef4444;
+        }
+
+        .chart-container {
+            height: 220px;
+        }
+        @media (max-width:640px) {
+            .chart-container {
+                height: 170px;
+            }
+        }
+
+        .product-image-thumb {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #1a1f2e;
+        }
+
+        /* ===== FIXED: DARK FORM INPUTS ===== */
+        .form-input {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #f0f4ff !important;
+            transition: all 0.25s;
+            border-radius: 0.75rem;
+            padding: 0.625rem 1rem;
+            width: 100%;
+            font-size: 0.875rem;
+            outline: none;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #1a5bff !important;
+            box-shadow: 0 0 0 3px rgba(26, 91, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+        .form-input option {
+            background: #1a1f2e !important;
+            color: #f0f4ff !important;
+        }
+        .form-input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 1000px #1a1f2e inset !important;
+            -webkit-text-fill-color: #f0f4ff !important;
+        }
+        .form-input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #1a1f2e inset !important;
+            -webkit-text-fill-color: #f0f4ff !important;
+        }
+
+        /* Login form inputs */
+        #login-form .form-input {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #f0f4ff !important;
+        }
+        #login-form .form-input:focus {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: #1a5bff !important;
+        }
+        #login-form .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+
+        /* Select dropdown fix */
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25rem;
+            padding-right: 2.5rem;
+        }
+        select.form-input option {
+            background: #1a1f2e !important;
+            color: #f0f4ff !important;
+        }
+
+        /* Textarea fix */
+        textarea.form-input {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #f0f4ff !important;
+            min-height: 60px;
+        }
+        textarea.form-input:focus {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: #1a5bff !important;
+        }
+        textarea.form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+
+        /* Modal inputs */
+        .modal-content .form-input {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #f0f4ff !important;
+        }
+        .modal-content .form-input:focus {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: #1a5bff !important;
+        }
+        .modal-content .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+
+        .image-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .image-upload-area:hover {
+            border-color: rgba(26, 91, 255, 0.4);
+            background: rgba(26, 91, 255, 0.05);
+        }
+        .image-upload-area.dragover {
+            border-color: #1a5bff;
+            background: rgba(26, 91, 255, 0.1);
+        }
+        .product-image-preview {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: #1a1f2e;
+        }
+
+        .image-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .activity-item {
+            border-left: 2px solid rgba(26, 91, 255, 0.3);
+            padding-left: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .activity-item .time {
+            font-size: 0.65rem;
+            color: #6b7280;
+        }
+
+        .notification-count {
+            background: #ef4444;
+            color: white;
+            border-radius: 999px;
+            font-size: 0.6rem;
+            padding: 0.1rem 0.4rem;
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .quick-stat-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 1.25rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.3s;
+        }
+        .quick-stat-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .quick-stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 900;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            max-width: 540px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 2rem;
+            animation: modalIn 0.35s;
+        }
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.94) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+            transform: translateY(120px);
+            opacity: 0;
+            transition: all 0.5s;
+            max-width: 440px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast-success {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        .toast-success .toast-icon {
+            color: #10b981;
+        }
+        .toast-error {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .toast-error .toast-icon {
+            color: #ef4444;
+        }
+        .toast-warning {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+        .toast-warning .toast-icon {
+            color: #f59e0b;
+        }
+
+        .login-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .login-overlay.active {
+            display: flex;
+        }
+        .login-box {
+            max-width: 400px;
+            width: 100%;
+            padding: 2.5rem;
+            border-radius: 2rem;
+        }
+
+        .no-print {
+            @media print {
+                display: none !important;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #141b28;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #1a5bff, #0a3bb5);
+            border-radius: 10px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: #1a1a1a;
+            }
+            .glass-card {
+                background: white;
+                border: 1px solid #ddd;
+                box-shadow: none;
+            }
+            .admin-stat {
+                background: #f5f5f5;
+                border: 1px solid #ddd;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .glass {
+                background: white;
+                border: 1px solid #ddd;
+            }
+        }
+
+        @media (max-width:640px) {
+            .quick-stat-card {
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+            .admin-stat {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="glass border-b border-white/5 px-4 sm:px-6 lg:px-8 sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto flex items-center justify-between h-16">
+            <div class="flex items-center space-x-3">
+<img src="logo.jpg" alt="AD Security Admin" 
+     style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(26, 91, 255, 0.4); box-shadow: 0 0 25px rgba(26, 91, 255, 0.2);" />
+<span class="text-xl font-bold text-white ml-2"><span class="text-gradient">AD</span> Admin</span>
+<span class="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">v6.0</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative cursor-pointer" onclick="showNotifications()">
+                    <i class="fas fa-bell text-xl text-gray-300 hover:text-white transition"></i>
+                    <span class="notification-count" id="notif-count">0</span>
+                </div>
+                <div class="sound-toggle cursor-pointer" onclick="toggleSound()" title="Toggle sound">
+                    <i class="fas fa-volume-up text-xl text-gray-300 hover:text-white transition" id="sound-icon"></i>
+                </div>
+                <a href="index.html" class="text-gray-300 hover:text-white text-sm transition no-print">
+                    <i class="fas fa-store mr-1"></i> View Store
+                </a>
+                <button onclick="logoutAdmin()" id="logout-btn" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm font-medium transition">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div id="admin-content" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Stats Row -->
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+            <div class="admin-stat">
+                <div class="text-2xl font-bold text-blue-400" id="stat-products">0</div>
+                <div class="text-sm text-gray-400">Products</div>
+            </div>
+            <div class="admin-stat">
+                <div class="text-2xl font-bold text-green-400" id="stat-orders">0</div>
+                <div class="text-sm text-gray-400">Orders</div>
+            </div>
+            <div class="admin-stat">
+                <div class="text-2xl font-bold text-yellow-400" id="stat-pending">0</div>
+                <div class="text-sm text-gray-400">Pending</div>
+            </div>
+            <div class="admin-stat">
+                <div class="text-2xl font-bold text-purple-400" id="stat-revenue">0 Br</div>
+                <div class="text-sm text-gray-400">Revenue</div>
+            </div>
+            <div class="admin-stat">
+                <div class="text-2xl font-bold text-pink-400" id="stat-customers">0</div>
+                <div class="text-sm text-gray-400">Customers</div>
+            </div>
+            <div class="admin-stat">
+                <div class="text-2xl font-bold text-orange-400" id="stat-subscribers">0</div>
+                <div class="text-sm text-gray-400">Subscribers</div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="quick-stat-card">
+                <div class="quick-stat-icon bg-blue-500/20 text-blue-400"><i class="fas fa-shopping-cart text-xl"></i></div>
+                <div><div class="text-sm text-gray-400">Today's Orders</div><div class="text-xl font-bold" id="today-orders">0</div></div>
+            </div>
+            <div class="quick-stat-card">
+                <div class="quick-stat-icon bg-green-500/20 text-green-400"><i class="fas fa-dollar-sign text-xl"></i></div>
+                <div><div class="text-sm text-gray-400">Today's Revenue</div><div class="text-xl font-bold text-green-400" id="today-revenue">0 Br</div></div>
+            </div>
+            <div class="quick-stat-card">
+                <div class="quick-stat-icon bg-yellow-500/20 text-yellow-400"><i class="fas fa-users text-xl"></i></div>
+                <div><div class="text-sm text-gray-400">New Customers</div><div class="text-xl font-bold text-yellow-400" id="new-customers">0</div></div>
+            </div>
+            <div class="quick-stat-card">
+                <div class="quick-stat-icon bg-red-500/20 text-red-400"><i class="fas fa-exclamation-triangle text-xl"></i></div>
+                <div><div class="text-sm text-gray-400">Low Stock Items</div><div class="text-xl font-bold text-red-400" id="low-stock-items">0</div></div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="glass-card p-6 rounded-2xl">
+                <h3 class="font-semibold mb-4"><i class="fas fa-chart-line mr-2 text-blue-400"></i> Sales Overview</h3>
+                <div class="chart-container"><canvas id="salesChart"></canvas></div>
+            </div>
+            <div class="glass-card p-6 rounded-2xl">
+                <h3 class="font-semibold mb-4"><i class="fas fa-chart-pie mr-2 text-green-400"></i> Service Categories</h3>
+                <div class="chart-container"><canvas id="categoryChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-4 border-b border-white/10 mb-6 overflow-x-auto no-print">
+            <button onclick="switchTab('dashboard')" class="tab-btn px-4 py-2 text-sm font-medium tab-active" data-tab="dashboard"><i class="fas fa-home mr-1"></i> Dashboard</button>
+            <button onclick="switchTab('products')" class="tab-btn px-4 py-2 text-sm font-medium tab-inactive" data-tab="products"><i class="fas fa-box mr-1"></i> Products</button>
+            <button onclick="switchTab('orders')" class="tab-btn px-4 py-2 text-sm font-medium tab-inactive" data-tab="orders"><i class="fas fa-truck mr-1"></i> Orders</button>
+            <button onclick="switchTab('services')" class="tab-btn px-4 py-2 text-sm font-medium tab-inactive" data-tab="services"><i class="fas fa-tools mr-1"></i> Services</button>
+            <button onclick="switchTab('customers')" class="tab-btn px-4 py-2 text-sm font-medium tab-inactive" data-tab="customers"><i class="fas fa-users mr-1"></i> Customers</button>
+            <button onclick="switchTab('inventory')" class="tab-btn px-4 py-2 text-sm font-medium tab-inactive" data-tab="inventory"><i class="fas fa-warehouse mr-1"></i> Inventory</button>
+            <button onclick="switchTab('settings')" class="tab-btn px-4 py-2 text-sm font-medium tab-inactive" data-tab="settings"><i class="fas fa-cog mr-1"></i> Settings</button>
+        </div>
+
+        <!-- ===== DASHBOARD ===== -->
+        <div id="dashboard-tab" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-6 rounded-2xl lg:col-span-2">
+                    <h3 class="font-semibold mb-4"><i class="fas fa-clock mr-2 text-blue-400"></i> Recent Orders</h3>
+                    <div id="recent-orders" class="space-y-3"></div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="font-semibold mb-4"><i class="fas fa-bolt mr-2 text-yellow-400"></i> Quick Actions</h3>
+                    <div class="space-y-3">
+                        <button onclick="switchTab('products'); toggleAddForm()" class="btn-primary w-full py-2 text-sm"><i class="fas fa-plus mr-1"></i> Add Product</button>
+                        <button onclick="switchTab('orders')" class="btn-outline w-full py-2 text-sm"><i class="fas fa-truck mr-1"></i> View Orders</button>
+                        <button onclick="switchTab('services')" class="btn-outline w-full py-2 text-sm"><i class="fas fa-tools mr-1"></i> Manage Services</button>
+                        <button onclick="switchTab('customers')" class="btn-outline w-full py-2 text-sm"><i class="fas fa-users mr-1"></i> Customers</button>
+                        <button onclick="generateReport()" class="btn-success w-full py-2 text-sm"><i class="fas fa-file-pdf mr-1"></i> Generate Report</button>
+                        <button onclick="sendNewsletter()" class="btn-warning w-full py-2 text-sm"><i class="fas fa-paper-plane mr-1"></i> Send Newsletter</button>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="font-semibold mb-4"><i class="fas fa-tag mr-2 text-purple-400"></i> Top Products</h3>
+                    <div id="top-products" class="space-y-2"></div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="font-semibold mb-4"><i class="fas fa-activity mr-2 text-green-400"></i> Activity Feed</h3>
+                    <div id="activity-feed" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PRODUCTS ===== -->
+        <div id="products-tab" class="tab-content hidden">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="toggleAddForm()" class="btn-primary"><i class="fas fa-plus mr-1"></i> Add Product</button>
+                    <button onclick="exportProducts()" class="btn-outline text-sm"><i class="fas fa-file-export mr-1"></i> Export</button>
+                    <button onclick="document.getElementById('import-file').click()" class="btn-outline text-sm"><i class="fas fa-file-import mr-1"></i> Import</button>
+                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importProducts(event)">
+                </div>
+                <div class="flex gap-2">
+                    <select id="filter-category" onchange="renderAdminProducts()" class="form-input !w-auto">
+                        <option value="all">All Categories</option>
+                        <option value="cctv">CCTV</option>
+                        <option value="attendance">Time Attendance</option>
+                        <option value="intercom">Video Intercom</option>
+                        <option value="network">Network</option>
+                    </select>
+                    <input type="text" id="search-products" placeholder="Search products..." class="form-input !w-48">
+                </div>
+            </div>
+
+            <!-- Add Product Form -->
+            <div id="add-form" class="glass-card p-6 rounded-2xl mb-6 hidden">
+                <h3 class="font-semibold mb-4 text-blue-300"><i class="fas fa-plus-circle mr-2"></i> Add New Product</h3>
+                <form id="admin-add-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input id="prod-name" type="text" placeholder="Product Name" class="form-input" required>
+                    <input id="prod-price" type="text" placeholder="Price (e.g. 8,500 Br)" class="form-input" required>
+                    <input id="prod-stock" type="text" placeholder="Stock" class="form-input" value="In Stock">
+                    <input id="prod-rating" type="number" placeholder="Rating (1-5)" class="form-input" value="4.5" min="1" max="5" step="0.1">
+                    <select id="prod-category" class="form-input">
+                        <option value="cctv">CCTV</option>
+                        <option value="attendance">Time Attendance</option>
+                        <option value="intercom">Video Intercom</option>
+                        <option value="network">Network</option>
+                    </select>
+                    <input id="prod-sku" type="text" placeholder="SKU (e.g. SKU-001)" class="form-input">
+                    <div class="md:col-span-2">
+                        <label class="text-sm text-gray-400 block mb-2">Product Image</label>
+                        <div id="image-upload-area" class="image-upload-area" onclick="document.getElementById('image-input').click()">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-blue-400/60 mb-2"></i>
+                            <p class="text-sm text-gray-400">Click or drag to upload product image</p>
+                            <p class="text-xs text-gray-500">PNG, JPG, WebP (max 2MB)</p>
+                            <input type="file" id="image-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                        </div>
+                        <div id="image-preview" class="hidden mt-3">
+                            <div class="image-preview-container">
+                                <img id="product-image-preview" class="product-image-preview" src="" alt="Product image">
+                                <div>
+                                    <p class="text-sm text-green-400"><i class="fas fa-check-circle mr-1"></i> Image uploaded</p>
+                                    <button type="button" onclick="removeImage()" class="text-red-400 hover:text-red-300 text-sm mt-1">
+                                        <i class="fas fa-times-circle mr-1"></i> Remove Image
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="prod-image" value="">
+                    </div>
+                    <textarea id="prod-desc" rows="2" placeholder="Description" class="md:col-span-2 form-input">High-quality product from AD Security.</textarea>
+                    <button type="submit" class="md:col-span-2 btn-primary py-3 rounded-xl font-semibold"><i class="fas fa-plus mr-2"></i> Add Product</button>
+                </form>
+            </div>
+
+            <div id="admin-product-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div id="product-pagination" class="flex justify-center gap-2 mt-4 no-print"></div>
+        </div>
+
+        <!-- ===== ORDERS ===== -->
+        <div id="orders-tab" class="tab-content hidden">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <h3 class="text-lg font-semibold"><i class="fas fa-truck mr-2 text-blue-400"></i> Manage Orders</h3>
+                <div class="flex gap-2">
+                    <select id="filter-order-status" onchange="renderAdminOrders()" class="form-input !w-auto">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button onclick="exportOrders()" class="btn-outline text-sm"><i class="fas fa-file-export mr-1"></i> Export</button>
+                    <button onclick="printOrders()" class="btn-outline text-sm"><i class="fas fa-print mr-1"></i> Print</button>
+                </div>
+            </div>
+            <div id="admin-order-list" class="space-y-4"></div>
+        </div>
+
+        <!-- ===== SERVICES ===== -->
+        <div id="services-tab" class="tab-content hidden">
+            <h3 class="text-lg font-semibold mb-4"><i class="fas fa-tools mr-2 text-blue-400"></i> Manage Services</h3>
+            <div class="glass-card p-6 rounded-2xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <i class="fas fa-video text-3xl text-blue-400 mb-2"></i>
+                        <h4 class="font-semibold">CCTV Systems</h4>
+                        <p class="text-xs text-gray-400">Installation, Repair, Maintenance</p>
+                        <span class="inline-block mt-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Active</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <i class="fas fa-network-wired text-3xl text-green-400 mb-2"></i>
+                        <h4 class="font-semibold">Network Solutions</h4>
+                        <p class="text-xs text-gray-400">Installation, Configuration, Optimization</p>
+                        <span class="inline-block mt-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Active</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <i class="fas fa-clock text-3xl text-yellow-400 mb-2"></i>
+                        <h4 class="font-semibold">Time Attendance</h4>
+                        <p class="text-xs text-gray-400">Installation, Sales, Support</p>
+                        <span class="inline-block mt-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Active</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <i class="fas fa-door-open text-3xl text-purple-400 mb-2"></i>
+                        <h4 class="font-semibold">Video Intercom</h4>
+                        <p class="text-xs text-gray-400">Installation, Sales, Integration</p>
+                        <span class="inline-block mt-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Active</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <i class="fas fa-code text-3xl text-orange-400 mb-2"></i>
+                        <h4 class="font-semibold">Web &amp; IT</h4>
+                        <p class="text-xs text-gray-400">Design, Development, Consulting</p>
+                        <span class="inline-block mt-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Active</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <i class="fas fa-shield-alt text-3xl text-red-400 mb-2"></i>
+                        <h4 class="font-semibold">Access Control</h4>
+                        <p class="text-xs text-gray-400">Installation, Integration, Support</p>
+                        <span class="inline-block mt-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Active</span>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-white/5 rounded-xl">
+                    <h4 class="font-semibold mb-2">Service Requests</h4>
+                    <div id="service-requests" class="space-y-2"><div class="text-center text-gray-400 text-sm">No service requests</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CUSTOMERS ===== -->
+        <div id="customers-tab" class="tab-content hidden">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <h3 class="text-lg font-semibold"><i class="fas fa-users mr-2 text-blue-400"></i> Customer Management</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="search-customers" placeholder="Search customers..." class="form-input !w-48">
+                    <button class="btn-primary text-sm" onclick="sendNewsletter()"><i class="fas fa-paper-plane mr-1"></i> Newsletter</button>
+                    <button class="btn-success text-sm" onclick="exportCustomers()"><i class="fas fa-file-export mr-1"></i> Export</button>
+                </div>
+            </div>
+            <div class="glass-card p-6 rounded-2xl">
+                <div id="customer-list" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- ===== INVENTORY ===== -->
+        <div id="inventory-tab" class="tab-content hidden">
+            <h3 class="text-lg font-semibold mb-4"><i class="fas fa-warehouse mr-2 text-blue-400"></i> Inventory Management</h3>
+            <div class="glass-card p-6 rounded-2xl">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white/5 p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-green-400" id="inv-in-stock">0</div>
+                        <div class="text-sm text-gray-400">In Stock</div>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-yellow-400" id="inv-low-stock">0</div>
+                        <div class="text-sm text-gray-400">Low Stock</div>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-red-400" id="inv-out-stock">0</div>
+                        <div class="text-sm text-gray-400">Out of Stock</div>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-blue-400" id="inv-total-value">0 Br</div>
+                        <div class="text-sm text-gray-400">Total Value</div>
+                    </div>
+                </div>
+                <div id="inventory-list" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- ===== SETTINGS ===== -->
+        <div id="settings-tab" class="tab-content hidden">
+            <h3 class="text-lg font-semibold mb-4"><i class="fas fa-cog mr-2 text-blue-400"></i> Settings</h3>
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-sm text-gray-400 block mb-1">Store Name</label><input type="text" id="setting-store-name" value="AD Security Camera & Networking" class="form-input"></div>
+                    <div><label class="text-sm text-gray-400 block mb-1">Store Email</label><input type="email" id="setting-store-email" value="adcctvcamera16@gmail.com" class="form-input"></div>
+                    <div><label class="text-sm text-gray-400 block mb-1">Currency</label><select id="setting-currency" class="form-input"><option value="Br">ETB (Br)</option><option value="$">USD ($)</option></select></div>
+                    <div><label class="text-sm text-gray-400 block mb-1">Tax Rate (%)</label><input type="number" id="setting-tax" value="15" class="form-input"></div>
+                    <div><label class="text-sm text-gray-400 block mb-1">Phone 1</label><input type="text" id="setting-phone1" value="+251 985 959 697" class="form-input"></div>
+                    <div><label class="text-sm text-gray-400 block mb-1">Phone 2</label><input type="text" id="setting-phone2" value="+251 918 109 779" class="form-input"></div>
+                </div>
+                <div class="flex gap-4 flex-wrap">
+                    <button class="btn-success" onclick="saveSettings()"><i class="fas fa-save mr-1"></i> Save Settings</button>
+                    <button class="btn-danger" onclick="clearAllData()"><i class="fas fa-trash mr-1"></i> Clear All Data</button>
+                    <button class="btn-warning" onclick="backupData()"><i class="fas fa-database mr-1"></i> Backup</button>
+                    <button class="btn-primary" onclick="restoreData()"><i class="fas fa-upload mr-1"></i> Restore</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NOTIFICATION MODAL ===== -->
+    <div id="notif-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-6 relative">
+            <button onclick="closeNotifModal()" class="absolute top-4 right-6 text-gray-400 hover:text-white text-3xl">&times;</button>
+            <h2 class="text-2xl font-bold mb-4"><i class="fas fa-bell mr-2 text-blue-400"></i> Notifications</h2>
+            <div id="notif-list" class="space-y-3 max-h-[60vh] overflow-y-auto"></div>
+        </div>
+    </div>
+
+<!-- ===== LOGIN ===== -->
+<div id="login-overlay" class="login-overlay active">
+    <div class="login-box glass-card" style="max-width: 400px; width: 100%; padding: 2rem 2rem 1.8rem; position: relative; overflow: hidden;">
+        <!-- Background Glow -->
+        <div style="position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(26, 91, 255, 0.05), transparent 70%); pointer-events: none;"></div>
+        
+        <!-- Logo Section -->
+        <div class="flex flex-col items-center mb-4 relative" style="z-index: 1;">
+            <div class="relative group">
+                <!-- Glow Ring -->
+                <div style="position: absolute; inset: -6px; border-radius: 50%; background: radial-gradient(circle, rgba(26, 91, 255, 0.15), transparent 70%); filter: blur(15px); animation: glowPulse 3s ease-in-out infinite;"></div>
+                <!-- Logo -->
+                <img src="logo.jpg" alt="AD Security" 
+                     style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2.5px solid rgba(26, 91, 255, 0.3); box-shadow: 0 0 40px rgba(26, 91, 255, 0.12); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; z-index: 1;"
+                     onmouseover="this.style.boxShadow='0 0 60px rgba(26, 91, 255, 0.25)'; this.style.transform='scale(1.06)'; this.style.borderColor='rgba(26, 91, 255, 0.6)';" 
+                     onmouseout="this.style.boxShadow='0 0 40px rgba(26, 91, 255, 0.12)'; this.style.transform='scale(1)'; this.style.borderColor='rgba(26, 91, 255, 0.3)';" />
+            </div>
+            
+            <!-- Brand Name -->
+            <div class="text-center mt-3">
+                <div style="font-size: 24px; font-weight: 800; color: white; letter-spacing: -0.5px; line-height: 1.1;">
+                    <span style="background: linear-gradient(135deg, #7aa9ff, #1a5bff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AD</span> 
+                    <span style="color: white;">Security</span>
+                </div>
+                <div style="font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 2.5px; margin-top: -2px; font-weight: 500;">
+                    Camera & Networking
+                </div>
+            </div>
+        </div>
+        
+        <!-- Divider -->
+        <div style="width: 50px; height: 2px; background: linear-gradient(to right, transparent, rgba(26, 91, 255, 0.4), transparent); margin: 0 auto 16px auto; border-radius: 2px;"></div>
+        
+        <!-- Title -->
+        <h2 style="font-size: 17px; font-weight: 600; margin-bottom: 2px; text-align: center; color: #e5e7eb;">
+        </h2>
+        <p style="text-align: center; font-size: 12px; color: #6b7280; margin-bottom: 18px;">Enter your credentials</p>
+        
+        <!-- Form -->
+        <form id="login-form" class="space-y-3" style="position: relative; z-index: 1;">
+            <div>
+                <label style="font-size: 12px; color: #9ca3af; display: block; margin-bottom: 4px; font-weight: 500;">
+                    <i class="fas fa-user" style="font-size: 11px; margin-right: 5px; color: #3b82f6;"></i>Username
+                </label>
+                <input type="text" id="login-username" placeholder="Enter username" class="form-input" value="admin" 
+                       style="background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.08) !important; color: #f0f4ff !important; padding: 10px 14px; border-radius: 10px; width: 100%; font-size: 13px; transition: all 0.3s;"
+                       onfocus="this.style.borderColor='rgba(26,91,255,0.5)'; this.style.boxShadow='0 0 0 3px rgba(26,91,255,0.08)';"
+                       onblur="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.boxShadow='none';" />
+            </div>
+            <div>
+                <label style="font-size: 12px; color: #9ca3af; display: block; margin-bottom: 4px; font-weight: 500;">
+                    <i class="fas fa-lock" style="font-size: 11px; margin-right: 5px; color: #3b82f6;"></i>Password
+                </label>
+                <input type="password" id="login-password" placeholder="Enter password" class="form-input" value="andu2026"
+                       style="background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.08) !important; color: #f0f4ff !important; padding: 10px 14px; border-radius: 10px; width: 100%; font-size: 13px; transition: all 0.3s;"
+                       onfocus="this.style.borderColor='rgba(26,91,255,0.5)'; this.style.boxShadow='0 0 0 3px rgba(26,91,255,0.08)';"
+                       onblur="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.boxShadow='none';" />
+            </div>
+            
+            <!-- Login Button -->
+            <button type="submit" style="width: 100%; padding: 11px; background: linear-gradient(135deg, #1a5bff, #0a3bb5); border: none; color: white; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px rgba(26, 91, 255, 0.2); transition: all 0.3s; margin-top: 4px;"
+                    onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 24px rgba(26, 91, 255, 0.35)';"
+                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 16px rgba(26, 91, 255, 0.2)';">
+                <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i> Login
+            </button>
+            
+            <!-- Error -->
+            <p id="login-error" class="text-red-400 text-xs text-center hidden" style="margin-top: 6px; padding: 6px 10px; background: rgba(239, 68, 68, 0.08); border-radius: 6px;">
+                <i class="fas fa-exclamation-circle" style="margin-right: 4px;"></i> Invalid credentials
+            </p>
+            
+            <!-- Footer -->
+            <div style="text-align: center; font-size: 11px; color: #4b5563; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.04);">
+                <p style="margin-bottom: 4px;">
+                    Default: <strong style="color: #3b82f6;">admin</strong> / <strong style="color: #3b82f6;">andu2026</strong>
+                </p>
+                <a href="index.html" style="color: #3b82f6; text-decoration: none; transition: all 0.3s; font-size: 11px;"
+                   onmouseover="this.style.color='#60a5fa';"
+                   onmouseout="this.style.color='#3b82f6';">
+                    <i class="fas fa-arrow-left" style="font-size: 9px;"></i> Back to Store
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <script>
+        // ============================================
+        // SOUND
+        // ============================================
+        var soundEnabled = true;
+
+        function playNotificationSound(type) {
+            if (!soundEnabled) return;
+            try {
+                var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                if (type === 'order') {
+                    [523, 659, 784, 1047].forEach(function(freq, idx) {
+                        setTimeout(function() {
+                            var osc = audioCtx.createOscillator();
+                            var gain = audioCtx.createGain();
+                            osc.connect(gain);
+                            gain.connect(audioCtx.destination);
+                            osc.frequency.value = freq;
+                            osc.type = 'sine';
+                            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                            osc.start(audioCtx.currentTime);
+                            osc.stop(audioCtx.currentTime + 0.3);
+                        }, idx * 100);
+                    });
+                } else if (type === 'service') {
+                    [880, 1100].forEach(function(freq, idx) {
+                        setTimeout(function() {
+                            var osc = audioCtx.createOscillator();
+                            var gain = audioCtx.createGain();
+                            osc.connect(gain);
+                            gain.connect(audioCtx.destination);
+                            osc.frequency.value = freq;
+                            osc.type = 'sine';
+                            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                            osc.start(audioCtx.currentTime);
+                            osc.stop(audioCtx.currentTime + 0.15);
+                        }, idx * 200);
+                    });
+                } else {
+                    var osc = audioCtx.createOscillator();
+                    var gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.frequency.value = 1200;
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.2);
+                }
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            var icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fas fa-volume-up text-xl text-gray-300 hover:text-white transition';
+                showToast('🔊 Sound on', 'success');
+            } else {
+                icon.className = 'fas fa-volume-mute text-xl text-gray-400 hover:text-white transition';
+                showToast('🔇 Sound off', 'warning');
+            }
+        }
+
+        // ============================================
+        // AUTH
+        // ============================================
+        var ADMIN_USERNAME = 'admin';
+        var ADMIN_PASSWORD = 'andu2026';
+        var isLoggedIn = false;
+
+        // ============================================
+        // DATA KEYS - SYNCED WITH STOREFRONT
+        // ============================================
+        var STORAGE_KEY = 'andu_products';
+        var ORDERS_KEY = 'andu_orders';
+        var USERS_KEY = 'andu_users';
+        var NOTIFICATIONS_KEY = 'andu_notifications';
+        var SUBSCRIBERS_KEY = 'andu_subscribers';
+
+        function getDefaultProducts() {
+            return [
+                { id: 1, name: 'IP Camera', price: '17,000 Br', image: 'fa-camera', image_url: '',
+                    stock: 'In Stock', category: 'cctv', rating: 0, reviews: 0, sku: 'SKU-001',
+                    description: 'High-quality IP camera with night vision and motion detection.' },
+                { id: 2, name: 'PTZ Camera', price: '43,000 Br', image: 'fa-video', image_url: '',
+                    stock: 'In Stock', category: 'cctv', rating: 0, reviews: 0, sku: 'SKU-002',
+                    description: 'Professional PTZ camera with 360° rotation and zoom capability.' },
+                { id: 3, name: 'Hikvision NVR 8-Channel', price: '9,850 Br', image: 'fa-server', image_url: '',
+                    stock: 'In Stock', category: 'cctv', rating: 0, reviews: 0, sku: 'SKU-003',
+                    description: '8-channel NVR with 2TB HDD, H.265+ compression.' },
+                { id: 4, name: 'Fingerprint Time Attendance', price: '12,500 Br', image: 'fa-fingerprint',
+                    image_url: '', stock: 'In Stock', category: 'attendance', rating: 0, reviews: 0,
+                    sku: 'SKU-004', description: 'Biometric fingerprint time attendance, 1,000 users.' },
+                { id: 5, name: 'Face Recognition Attendance', price: '18,900 Br', image: 'fa-user-check',
+                    image_url: '', stock: 'In Stock', category: 'attendance', rating: 0, reviews: 0,
+                    sku: 'SKU-005', description: 'Face recognition attendance, touchless, 2,000 users.' },
+                { id: 6, name: 'Video Intercom System Kit', price: '15,200 Br', image: 'fa-door-open',
+                    image_url: '', stock: 'In Stock', category: 'intercom', rating: 0, reviews: 0,
+                    sku: 'SKU-006', description: 'Complete video intercom with 7-inch monitor.' },
+                { id: 7, name: 'Wireless Video Intercom', price: '22,000 Br', image: 'fa-wifi', image_url: '',
+                    stock: 'Low Stock', category: 'intercom', rating: 0, reviews: 0, sku: 'SKU-007',
+                    description: 'Wireless video intercom with smartphone integration.' },
+                { id: 8, name: 'Enterprise Network Switch', price: '7,800 Br', image: 'fa-server', image_url: '',
+                    stock: 'In Stock', category: 'network', rating: 0, reviews: 0, sku: 'SKU-008',
+                    description: '24-port Gigabit switch with PoE+, managed.' },
+                { id: 9, name: 'WiFi 6 Access Point', price: '5,200 Br', image: 'fa-wifi', image_url: '',
+                    stock: 'In Stock', category: 'network', rating: 0, reviews: 0, sku: 'SKU-009',
+                    description: 'WiFi 6 AP, dual-band, 3000 Mbps.' }
+            ];
+        }
+
+        var products = [];
+        var orders = [];
+        var users = [];
+        var notifications = [];
+        var subscribers = [];
+        var uploadedImageData = null;
+        var currentPage = 1;
+        var itemsPerPage = 9;
+
+        // ============================================
+        // LOAD DATA
+        // ============================================
+        function loadAllData() {
+            var rawProducts = localStorage.getItem(STORAGE_KEY);
+            if (rawProducts) {
+                try {
+                    products = JSON.parse(rawProducts);
+                    for (var i = 0; i < products.length; i++) {
+                        var p = products[i];
+                        if (!p.category) p.category = 'cctv';
+                        if (!p.image) p.image = 'fa-camera';
+                        if (!p.image_url) p.image_url = '';
+                        if (!p.stock) p.stock = 'In Stock';
+                        if (!p.rating) p.rating = 0;
+                        if (!p.reviews) p.reviews = 0;
+                        if (!p.sku) p.sku = 'SKU-' + String(p.id).padStart(3, '0');
+                    }
+                } catch (e) { products = getDefaultProducts(); }
+            } else {
+                products = getDefaultProducts();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+            }
+
+            var rawOrders = localStorage.getItem(ORDERS_KEY);
+            if (rawOrders) { try { orders = JSON.parse(rawOrders); } catch (e) { orders = []; } }
+            if (orders.length === 0) {
+                orders = [
+                    { id: 1001, customer: 'Abebe Kebede', email: 'abebe@email.com', phone: '+251 911 234 567',
+                        items: [{ name: 'Hikvision NVR 8-Channel', price: '9,850 Br', quantity: 1 }],
+                        total: '9,850 Br', status: 'pending', date: '2026-07-10', tracking: 'TRK-ABC123' },
+                    { id: 1002, customer: 'Selam Tesfaye', email: 'selam@email.com', phone: '+251 922 345 678',
+                        items: [{ name: 'Dell XPS Desktop', price: '40,450 Br', quantity: 1 }],
+                        total: '40,450 Br', status: 'shipped', date: '2026-07-09', tracking: 'TRK-DEF456' },
+                    { id: 1003, customer: 'Dawit Assefa', email: 'dawit@email.com', phone: '+251 933 456 789',
+                        items: [{ name: 'Lenovo ThinkPad X1 Carbon', price: '58,450 Br', quantity: 1 }],
+                        total: '58,450 Br', status: 'delivered', date: '2026-07-08', tracking: 'TRK-GHI789' }
+                ];
+                localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+            }
+
+            var rawUsers = localStorage.getItem(USERS_KEY);
+            if (rawUsers) {
+                try { users = JSON.parse(rawUsers); } catch (e) { users = []; }
+            }
+            if (users.length === 0) {
+                users = [
+                    { id: 1, name: 'Abebe Kebede', email: 'abebe@email.com', phone: '+251 911 234 567',
+                        joined: '2026-06-01', password: 'password123' },
+                    { id: 2, name: 'Selam Tesfaye', email: 'selam@email.com', phone: '+251 922 345 678',
+                        joined: '2026-05-15', password: 'password123' },
+                    { id: 3, name: 'Dawit Assefa', email: 'dawit@email.com', phone: '+251 933 456 789',
+                        joined: '2026-06-20', password: 'password123' },
+                    { id: 4, name: 'Meron Haile', email: 'meron@email.com', phone: '+251 944 567 890',
+                        joined: '2026-04-10', password: 'password123' }
+                ];
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            }
+
+            var rawNotif = localStorage.getItem(NOTIFICATIONS_KEY);
+            if (rawNotif) { try { notifications = JSON.parse(rawNotif); } catch (e) { notifications = []; } }
+            if (notifications.length === 0) {
+                notifications = [
+                    { id: 1, message: 'Welcome to AD Security Admin Panel!', time: 'Just now', read: false }
+                ];
+                localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
+            }
+
+            var rawSubscribers = localStorage.getItem(SUBSCRIBERS_KEY);
+            if (rawSubscribers) { try { subscribers = JSON.parse(rawSubscribers); } catch (e) { subscribers = []; } }
+
+            updateNotificationBadge();
+        }
+
+        function updateNotificationBadge() {
+            var unread = 0;
+            for (var i = 0; i < notifications.length; i++) { if (!notifications[i].read) unread++; }
+            document.getElementById('notif-count').textContent = unread;
+        }
+
+        // ============================================
+        // IMAGE UPLOAD
+        // ============================================
+        function handleImageUpload(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { showToast('❌ Image max 2MB', 'error'); return; }
+            var validTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+            if (!validTypes.includes(file.type)) { showToast('❌ PNG, JPG, WebP, GIF only', 'error'); return; }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImageData = e.target.result;
+                document.getElementById('product-image-preview').src = uploadedImageData;
+                document.getElementById('image-preview').classList.remove('hidden');
+                document.getElementById('image-upload-area').classList.add('hidden');
+                document.getElementById('prod-image').value = uploadedImageData;
+                showToast('✅ Image uploaded!', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            uploadedImageData = null;
+            document.getElementById('image-preview').classList.add('hidden');
+            document.getElementById('image-upload-area').classList.remove('hidden');
+            document.getElementById('prod-image').value = '';
+            document.getElementById('image-input').value = '';
+            showToast('Image removed', 'warning');
+        }
+
+        // ============================================
+        // LOGIN
+        // ============================================
+        document.getElementById('login-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var username = document.getElementById('login-username').value;
+            var password = document.getElementById('login-password').value;
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                isLoggedIn = true;
+                document.getElementById('login-overlay').classList.remove('active');
+                document.getElementById('admin-content').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+                initAdmin();
+                showToast('Welcome Admin!', 'success');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
+
+        function logoutAdmin() {
+            isLoggedIn = false;
+            document.getElementById('login-overlay').classList.add('active');
+            document.getElementById('admin-content').classList.add('hidden');
+            document.getElementById('logout-btn').classList.add('hidden');
+            document.getElementById('login-form').reset();
+            showToast('Logged out', 'warning');
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        function initAdmin() {
+            loadAllData();
+            renderAdminProducts();
+            renderAdminOrders();
+            renderCustomers();
+            renderInventory();
+            renderDashboard();
+            updateAdminStats();
+            updateAnalytics();
+            initCharts();
+            checkServiceRequests();
+            console.log('✅ Admin ready:', products.length, 'products,', orders.length, 'orders,', users.length, 'customers');
+            console.log('🔄 Synced with storefront user data (andu_users)');
+            console.log('❌ Compare feature removed');
+        }
+
+        // ============================================
+        // CHECK SERVICE REQUESTS
+        // ============================================
+        function checkServiceRequests() {
+            var sr = JSON.parse(localStorage.getItem('andu_service_requests') || '[]');
+            if (sr.length > 0) {
+                var container = document.getElementById('service-requests');
+                var html = '';
+                for (var i = 0; i < sr.length; i++) {
+                    html += `
+                        <div class="flex items-center justify-between bg-white/5 p-2 rounded-lg text-sm">
+                            <span>${sr[i].name} - ${sr[i].service}</span>
+                            <span class="status-badge status-${sr[i].status || 'pending'}">${sr[i].status || 'pending'}</span>
+                            <span class="text-xs text-gray-400">${sr[i].date}</span>
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
+            }
+        }
+
+        // ============================================
+        // DASHBOARD
+        // ============================================
+        function renderDashboard() {
+            var recent = document.getElementById('recent-orders');
+            var recentOrders = orders.slice(0, 5);
+            if (recentOrders.length === 0) {
+                recent.innerHTML = '<div class="text-gray-400 text-sm">No recent orders</div>';
+            } else {
+                var html = '';
+                for (var i = 0; i < recentOrders.length; i++) {
+                    var o = recentOrders[i];
+                    var itemsHtml = '';
+                    for (var j = 0; j < o.items.length; j++) {
+                        itemsHtml += o.items[j].name + (j < o.items.length - 1 ? ', ' : '');
+                    }
+                    html += `
+                        <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl">
+                            <div><div class="font-semibold text-sm">#${o.id} - ${o.customer}</div>
+                            <div class="text-xs text-gray-400">${o.date} | ${itemsHtml}</div></div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-orange-400 text-sm">${o.total}</span>
+                                <span class="status-badge status-${o.status}">${o.status}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                recent.innerHTML = html;
+            }
+
+            var top = document.getElementById('top-products');
+            var productCount = {};
+            for (var i = 0; i < orders.length; i++) {
+                for (var j = 0; j < orders[i].items.length; j++) {
+                    var item = orders[i].items[j];
+                    productCount[item.name] = (productCount[item.name] || 0) + (item.quantity || 1);
+                }
+            }
+            var sorted = Object.entries(productCount).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 5);
+            if (sorted.length === 0) {
+                top.innerHTML = '<div class="text-gray-400 text-sm">No sales data yet</div>';
+            } else {
+                var html = '';
+                for (var i = 0; i < sorted.length; i++) {
+                    html += `
+                        <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                            <span class="text-sm">${sorted[i][0]}</span>
+                            <span class="text-xs text-blue-400">${sorted[i][1]} sold</span>
+                        </div>
+                    `;
+                }
+                top.innerHTML = html;
+            }
+
+            var feed = document.getElementById('activity-feed');
+            var activities = [];
+            for (var i = 0; i < Math.min(orders.length, 3); i++) {
+                activities.push('📦 New order #' + orders[i].id + ' from ' + orders[i].customer);
+            }
+            if (products.length > 0) activities.push('📱 ' + products.length + ' products in catalog');
+            if (users.length > 0) activities.push('👤 ' + users.length + ' registered customers');
+            var html = '';
+            for (var i = 0; i < activities.length; i++) {
+                html += `<div class="activity-item"><div class="text-sm">${activities[i]}</div><div class="time">Just now</div></div>`;
+            }
+            feed.innerHTML = html;
+        }
+
+        // ============================================
+        // RENDER PRODUCTS
+        // ============================================
+        function renderAdminProducts() {
+            var container = document.getElementById('admin-product-list');
+            if (!container) return;
+            var searchTerm = document.getElementById('search-products')?.value.toLowerCase() || '';
+            var categoryFilter = document.getElementById('filter-category')?.value || 'all';
+            var filtered = [];
+            for (var i = 0; i < products.length; i++) {
+                var p = products[i];
+                if (p.name.toLowerCase().includes(searchTerm) && (categoryFilter === 'all' || p.category ===
+                        categoryFilter)) {
+                    filtered.push(p);
+                }
+            }
+            var totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = 1;
+            var start = (currentPage - 1) * itemsPerPage;
+            var paginated = filtered.slice(start, start + itemsPerPage);
+            if (paginated.length === 0) {
+                container.innerHTML =
+                    '<div class="col-span-full text-center py-8 text-gray-400"><i class="fas fa-box-open text-4xl mb-2 opacity-30"></i><p>No products found</p></div>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < paginated.length; i++) {
+                var p = paginated[i];
+                var hasImage = p.image_url && p.image_url.startsWith('data:image');
+                var imageDisplay = hasImage ?
+                    '<img src="' + p.image_url + '" alt="' + p.name + '" class="product-image-thumb">' :
+                    '<div class="bg-white/5 rounded-xl w-14 h-14 flex items-center justify-center"><i class="fas ' + (p
+                        .image || 'fa-camera') + ' text-2xl text-blue-400/60"></i></div>';
+                var catLabels = { 'cctv': 'CCTV', 'attendance': 'Time Attendance', 'intercom': 'Video Intercom',
+                    'network': 'Network' };
+                html += `
+                    <div class="glass-card rounded-2xl p-4 flex items-start gap-4">
+                        <div class="bg-white/5 rounded-xl w-14 h-14 flex items-center justify-center flex-shrink-0 overflow-hidden">${imageDisplay}</div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-sm truncate">${p.name}</h4>
+                            <div class="text-orange-400 font-bold text-sm">${p.price}</div>
+                            <div class="text-xs ${p.stock?.includes('In') ? 'text-green-400' : p.stock?.includes('Low') ? 'text-yellow-400' : 'text-red-400'}">${p.stock || 'In Stock'}</div>
+                            <div class="text-xs text-gray-400">SKU: ${p.sku || 'N/A'} | ${catLabels[p.category] || p.category}</div>
+                            ${hasImage ? '<span class="text-xs text-green-400"><i class="fas fa-image mr-1"></i>Has image</span>' : ''}
+                            <div class="flex gap-1 mt-1">
+                                <span class="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full"><i class="fas fa-shopping-cart mr-1"></i> Add to Cart</span>
+                                <span class="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full"><i class="fas fa-bolt mr-1"></i> Place Order</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="editProduct(${p.id})" class="text-blue-400 hover:text-blue-300 text-sm"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteProduct(${p.id})" class="text-red-400 hover:text-red-300 text-sm"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+            var pagination = document.getElementById('product-pagination');
+            if (totalPages > 1) {
+                pagination.innerHTML = `
+                    <button onclick="changePage(${currentPage - 1})" class="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-sm ${currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : ''}">Previous</button>
+                    <span class="text-sm text-gray-400">Page ${currentPage} of ${totalPages}</span>
+                    <button onclick="changePage(${currentPage + 1})" class="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-sm ${currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : ''}">Next</button>
+                `;
+            } else { pagination.innerHTML = ''; }
+        }
+
+        function changePage(page) {
+            var totalPages = Math.ceil(products.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderAdminProducts();
+        }
+
+        // ============================================
+        // RENDER ORDERS
+        // ============================================
+        function renderAdminOrders() {
+            var container = document.getElementById('admin-order-list');
+            if (!container) return;
+            var statusFilter = document.getElementById('filter-order-status')?.value || 'all';
+            var filtered = [];
+            for (var i = 0; i < orders.length; i++) {
+                if (statusFilter === 'all' || orders[i].status === statusFilter) filtered.push(orders[i]);
+            }
+            if (filtered.length === 0) {
+                container.innerHTML =
+                    '<div class="text-center py-12 text-gray-400"><i class="fas fa-inbox text-6xl mb-4 opacity-30"></i><p>No orders found</p></div>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < filtered.length; i++) {
+                var o = filtered[i];
+                var itemsHtml = '';
+                for (var j = 0; j < o.items.length; j++) {
+                    itemsHtml += o.items[j].name + ' x' + o.items[j].quantity + (j < o.items.length - 1 ? ', ' : '');
+                }
+                html += `
+                    <div class="glass-card rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <div class="font-semibold">#${o.id} - ${o.customer}</div>
+                            <div class="text-sm text-gray-400">${itemsHtml}</div>
+                            <div class="text-sm text-gray-400">📅 ${o.date} | 📦 ${o.tracking || 'N/A'}</div>
+                            <div class="text-sm text-gray-400">📧 ${o.email || 'N/A'} | 📞 ${o.phone || 'N/A'}</div>
+                            ${o.quickOrder ? '<span class="text-xs text-purple-400"><i class="fas fa-bolt mr-1"></i>Quick Order</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-4 flex-wrap">
+                            <span class="font-bold text-orange-400">${o.total}</span>
+                            <select onchange="updateOrderStatus(${o.id}, this.value)" class="form-input !w-auto !py-1 !px-3 !text-xs !rounded-full">
+                                <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
+                                <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmed</option>
+                                <option value="processing" ${o.status==='processing'?'selected':''}>Processing</option>
+                                <option value="shipped" ${o.status==='shipped'?'selected':''}>Shipped</option>
+                                <option value="delivered" ${o.status==='delivered'?'selected':''}>Delivered</option>
+                                <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option>
+                            </select>
+                            <span class="status-badge status-${o.status}">${o.status}</span>
+                            <button onclick="sendOrderEmail(${o.id})" class="text-blue-400 hover:text-blue-300 text-sm" title="Email"><i class="fas fa-envelope"></i></button>
+                            <button onclick="printInvoice(${o.id})" class="text-gray-400 hover:text-white text-sm" title="Print"><i class="fas fa-print"></i></button>
+                            <button onclick="deleteOrder(${o.id})" class="text-red-400 hover:text-red-300 text-sm" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // RENDER CUSTOMERS
+        // ============================================
+        function renderCustomers() {
+            var container = document.getElementById('customer-list');
+            if (!container) return;
+
+            var rawUsers = localStorage.getItem(USERS_KEY);
+            if (rawUsers) {
+                try { users = JSON.parse(rawUsers); } catch (e) {}
+            }
+
+            var searchTerm = document.getElementById('search-customers')?.value.toLowerCase() || '';
+            var filtered = [];
+            for (var i = 0; i < users.length; i++) {
+                var u = users[i];
+                if (u.name.toLowerCase().includes(searchTerm) || u.email.toLowerCase().includes(searchTerm)) {
+                    filtered.push(u);
+                }
+            }
+            if (filtered.length === 0) {
+                container.innerHTML =
+                    '<div class="text-center py-8 text-gray-400"><i class="fas fa-users text-4xl mb-2 opacity-30"></i><p>No customers found</p></div>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < filtered.length; i++) {
+                var u = filtered[i];
+                var userOrders = orders.filter(function(o) { return o.email === u.email; });
+                var totalSpent = 0;
+                for (var j = 0; j < userOrders.length; j++) {
+                    var val = parseFloat(userOrders[j].total?.replace(/,/g, '').replace(/[^0-9.]/g, '') || 0);
+                    if (!isNaN(val)) totalSpent += val;
+                }
+                html += `
+                    <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"><i class="fas fa-user text-blue-400"></i></div>
+                            <div><div class="font-semibold text-sm">${u.name}</div><div class="text-xs text-gray-400">${u.email} | ${u.phone || 'No phone'}</div></div>
+                        </div>
+                        <div class="flex items-center gap-4 text-sm">
+                            <span>${userOrders.length} orders</span>
+                            <span class="text-orange-400 font-bold">${totalSpent.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} Br</span>
+                            <span class="text-xs text-gray-400">Joined: ${u.joined || 'N/A'}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // RENDER INVENTORY
+        // ============================================
+        function renderInventory() {
+            var container = document.getElementById('inventory-list');
+            if (!container) return;
+            var inStock = 0,
+                lowStock = 0,
+                outStock = 0,
+                totalValue = 0;
+            for (var i = 0; i < products.length; i++) {
+                var p = products[i];
+                if (p.stock === 'In Stock') inStock++;
+                else if (p.stock === 'Low Stock') lowStock++;
+                else if (p.stock === 'Out of Stock') outStock++;
+                var val = parseFloat(p.price.replace(/,/g, '').replace(/[^0-9.]/g, '') || 0);
+                if (!isNaN(val)) totalValue += val;
+            }
+            document.getElementById('inv-in-stock').textContent = inStock;
+            document.getElementById('inv-low-stock').textContent = lowStock;
+            document.getElementById('inv-out-stock').textContent = outStock;
+            document.getElementById('inv-total-value').textContent = totalValue.toFixed(0).replace(
+                /\B(?=(\d{3})+(?!\d))/g, ",") + ' Br';
+            document.getElementById('low-stock-items').textContent = lowStock + outStock;
+            var html = '';
+            for (var i = 0; i < products.length; i++) {
+                var p = products[i];
+                var hasImage = p.image_url && p.image_url.startsWith('data:image');
+                var imageDisplay = hasImage ?
+                    '<img src="' + p.image_url + '" alt="' + p.name + '" class="w-full h-full object-cover">' :
+                    '<i class="fas ' + (p.image || 'fa-camera') + ' text-blue-400/60"></i>';
+                html += `
+                    <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center overflow-hidden">${imageDisplay}</div>
+                            <div><div class="font-semibold text-sm">${p.name}</div><div class="text-xs text-gray-400">${p.price} | SKU: ${p.sku || 'N/A'}</div></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs ${p.stock?.includes('In') ? 'text-green-400' : p.stock?.includes('Low') ? 'text-yellow-400' : 'text-red-400'}">${p.stock || 'In Stock'}</span>
+                            <button onclick="updateStock(${p.id})" class="text-blue-400 hover:text-blue-300 text-sm"><i class="fas fa-edit"></i></button>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // UPDATE FUNCTIONS
+        // ============================================
+        function updateStock(id) {
+            var p = null;
+            for (var i = 0; i < products.length; i++) { if (products[i].id === id) { p = products[i]; break; } }
+            if (!p) return;
+            var newStock = prompt('Update stock for ' + p.name + ':', p.stock);
+            if (newStock && newStock.trim()) {
+                p.stock = newStock.trim();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+                renderAdminProducts();
+                renderInventory();
+                updateAdminStats();
+                showToast('✅ Stock updated!', 'success');
+            }
+        }
+
+        function updateOrderStatus(id, newStatus) {
+            var order = null;
+            for (var i = 0; i < orders.length; i++) { if (orders[i].id === id) { order = orders[i]; break; } }
+            if (order) {
+                order.status = newStatus;
+                localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+                renderAdminOrders();
+                updateAdminStats();
+                updateAnalytics();
+                showToast('Order #' + id + ' → ' + newStatus, 'success');
+                playNotificationSound('order');
+            }
+        }
+
+        function deleteOrder(id) {
+            if (!confirm('Delete this order?')) return;
+            orders = orders.filter(function(o) { return o.id !== id; });
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+            renderAdminOrders();
+            updateAdminStats();
+            showToast('Order deleted', 'warning');
+        }
+
+        function sendOrderEmail(id) {
+            var order = null;
+            for (var i = 0; i < orders.length; i++) { if (orders[i].id === id) { order = orders[i]; break; } }
+            if (!order) return;
+            showToast('📧 Order email sent to ' + order.customer, 'success');
+            addNotification('Email sent to ' + order.customer, 'info');
+        }
+
+        function sendNewsletter() {
+            if (subscribers.length === 0) { showToast('No subscribers', 'warning'); return; }
+            showToast('📧 Newsletter sent to ' + subscribers.length + ' subscribers', 'success');
+            addNotification('Newsletter sent to ' + subscribers.length + ' subscribers', 'info');
+        }
+
+        function generateReport() { showToast('📊 Report generated!', 'success'); }
+
+function printInvoice(id) {
+    var order = null;
+    for (var i = 0; i < orders.length; i++) { 
+        if (orders[i].id === id) { 
+            order = orders[i]; 
+            break; 
+        } 
+    }
+    if (!order) return;
+    
+    var win = window.open('', '_blank');
+    if (win) {
+        var itemsHtml = '';
+        for (var j = 0; j < order.items.length; j++) {
+            itemsHtml += '<tr><td style="padding: 8px 12px; border-bottom: 1px solid #eee;">' + order.items[j].name + '</td><td style="padding: 8px 12px; border-bottom: 1px solid #eee; text-align: center;">x' + order.items[j].quantity + '</td><td style="padding: 8px 12px; border-bottom: 1px solid #eee; text-align: right;">' + order.items[j].price + '</td></tr>';
+        }
+        
+        win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Invoice #${order.id}</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { 
+                        font-family: 'Inter', 'Segoe UI', Arial, sans-serif; 
+                        padding: 40px; 
+                        background: #fff; 
+                        color: #1a1a1a;
+                        max-width: 800px;
+                        margin: 0 auto;
+                    }
+                    .invoice-wrapper {
+                        background: white;
+                        border-radius: 16px;
+                        padding: 40px;
+                        box-shadow: 0 0 40px rgba(0,0,0,0.05);
+                    }
+                    .header {
+                        display: flex;
+                        align-items: center;
+                        gap: 20px;
+                        border-bottom: 3px solid #1a5bff;
+                        padding-bottom: 24px;
+                        margin-bottom: 30px;
+                    }
+                    .header img {
+                        height: 70px;
+                        width: 70px;
+                        border-radius: 50%;
+                        object-fit: cover;
+                        border: 3px solid #1a5bff;
+                        padding: 3px;
+                    }
+                    .header .company h1 {
+                        font-size: 28px;
+                        font-weight: 800;
+                        color: #1a5bff;
+                        letter-spacing: -0.5px;
+                    }
+                    .header .company .sub {
+                        font-size: 13px;
+                        color: #6b7280;
+                        letter-spacing: 1px;
+                        text-transform: uppercase;
+                        margin-top: 2px;
+                    }
+                    .header .company .contact {
+                        font-size: 12px;
+                        color: #9ca3af;
+                        margin-top: 4px;
+                    }
+                    .header .company .contact span {
+                        margin: 0 8px;
+                    }
+                    .title {
+                        font-size: 26px;
+                        font-weight: 700;
+                        color: #1a5bff;
+                        margin-bottom: 24px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    .title i {
+                        font-size: 22px;
+                    }
+                    .details {
+                        background: #f8fafc;
+                        border-radius: 12px;
+                        padding: 20px;
+                        margin-bottom: 24px;
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 8px 20px;
+                    }
+                    .details .label {
+                        color: #6b7280;
+                        font-size: 13px;
+                        font-weight: 500;
+                    }
+                    .details .value {
+                        color: #1a1a1a;
+                        font-size: 14px;
+                        font-weight: 600;
+                    }
+                    .details .full {
+                        grid-column: span 2;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 20px 0 24px;
+                    }
+                    table th {
+                        background: #f0f7ff;
+                        color: #1a5bff;
+                        font-weight: 600;
+                        font-size: 13px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        padding: 12px 16px;
+                        text-align: left;
+                        border-bottom: 2px solid #1a5bff;
+                    }
+                    table th:last-child { text-align: right; }
+                    table td:last-child { text-align: right; }
+                    .total-box {
+                        background: linear-gradient(135deg, #f0f7ff, #e8f0fe);
+                        border-radius: 12px;
+                        padding: 20px 24px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-top: 8px;
+                    }
+                    .total-box .label {
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: #1a1a1a;
+                    }
+                    .total-box .amount {
+                        font-size: 28px;
+                        font-weight: 800;
+                        color: #1a5bff;
+                    }
+                    .status-badge {
+                        display: inline-block;
+                        padding: 4px 16px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        text-transform: capitalize;
+                        background: #10b98120;
+                        color: #10b981;
+                    }
+                    .status-badge.pending { background: #f59e0b20; color: #f59e0b; }
+                    .status-badge.confirmed { background: #3b82f620; color: #3b82f6; }
+                    .status-badge.processing { background: #8b5cf620; color: #8b5cf6; }
+                    .status-badge.shipped { background: #06b6d420; color: #06b6d4; }
+                    .status-badge.delivered { background: #10b98120; color: #10b981; }
+                    .status-badge.cancelled { background: #ef444420; color: #ef4444; }
+                    .footer {
+                        margin-top: 32px;
+                        padding-top: 20px;
+                        border-top: 2px solid #f0f0f0;
+                        text-align: center;
+                    }
+                    .footer .thanks {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: #1a5bff;
+                        margin-bottom: 4px;
+                    }
+                    .footer .info {
+                        font-size: 12px;
+                        color: #9ca3af;
+                    }
+                    .footer .info span { margin: 0 10px; }
+                    .watermark {
+                        position: fixed;
+                        bottom: 40px;
+                        right: 40px;
+                        opacity: 0.05;
+                        font-size: 80px;
+                        font-weight: 900;
+                        color: #1a5bff;
+                        pointer-events: none;
+                        z-index: 0;
+                    }
+                    @media print {
+                        body { padding: 20px; background: white; }
+                        .invoice-wrapper { box-shadow: none; padding: 20px; }
+                        .watermark { display: none; }
+                        .details { background: #f5f5f5; }
+                        table th { background: #e8e8e8; }
+                        .total-box { background: #f0f7ff; }
+                        .header img { 
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                    }
+                    @media (max-width: 600px) {
+                        body { padding: 16px; }
+                        .invoice-wrapper { padding: 16px; }
+                        .header { flex-direction: column; text-align: center; }
+                        .details { grid-template-columns: 1fr; }
+                        .details .full { grid-column: span 1; }
+                        .total-box { flex-direction: column; gap: 8px; text-align: center; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="watermark">AD</div>
+                <div class="invoice-wrapper">
+                    <!-- HEADER WITH LOGO -->
+                    <div class="header">
+                        <img src="logo.jpg" alt="AD Security" />
+                        <div class="company">
+                            <h1>AD Security</h1>
+                            <div class="sub">Camera & Networking</div>
+                            <div class="contact">
+                                 +251 985 959 697 <span>|</span>  adcctvcamera16@gmail.com
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TITLE -->
+                    <div class="title">
+                        <span>📄</span> Invoice #${order.id}
+                        <span style="margin-left: auto; font-size: 14px; font-weight: 400; color: #6b7280;">
+                            <span class="status-badge ${order.status}">${order.status}</span>
+                        </span>
+                    </div>
+                    
+                    <!-- ORDER DETAILS -->
+                    <div class="details">
+                        <div><span class="label">Customer</span><br><span class="value">${order.customer}</span></div>
+                        <div><span class="label">Date</span><br><span class="value">${order.date}</span></div>
+                        <div><span class="label">Email</span><br><span class="value">${order.email || 'N/A'}</span></div>
+                        <div><span class="label">Phone</span><br><span class="value">${order.phone || 'N/A'}</span></div>
+                        <div class="full"><span class="label">Tracking Number</span><br><span class="value" style="color: #1a5bff; font-family: monospace;">${order.tracking || 'N/A'}</span></div>
+                        ${order.quickOrder ? '<div class="full"><span class="label">Order Type</span><br><span class="value">⚡ Quick Order</span></div>' : ''}
+                        ${order.address ? '<div class="full"><span class="label">Delivery Address</span><br><span class="value">' + order.address + '</span></div>' : ''}
+                        ${order.payment ? '<div class="full"><span class="label">Payment Method</span><br><span class="value" style="text-transform: capitalize;">' + order.payment + '</span></div>' : ''}
+                    </div>
+                    
+                    <!-- ITEMS TABLE -->
+                    <table>
+                        <thead>
+                            <tr><th>Item</th><th style="text-align: center;">Qty</th><th style="text-align: right;">Price</th></tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+                    
+                    <!-- TOTAL -->
+                    <div class="total-box">
+                        <span class="label">Total Amount</span>
+                        <span class="amount">${order.total}</span>
+                    </div>
+                    
+                    <!-- FOOTER -->
+                    <div class="footer">
+                        <div class="thanks">Thank you for choosing AD Security!</div>
+                        <div class="info">
+                             Addis Ababa, Ethiopia 
+                            <span>|</span>  www.adsecurity.com 
+                            <span>|</span>  24/7 Support
+                        </div>
+                        <div style="margin-top: 8px; font-size: 10px; color: #d1d5db;">
+                            Generated on ${new Date().toLocaleString()}
+                        </div>
+                    </div>
+                </div>
+                
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.print();
+                        }, 500);
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        win.document.close();
+    }
+}
+        function printOrders() { window.print(); }
+
+        function exportCustomers() {
+            var data = JSON.stringify(users, null, 2);
+            var blob = new Blob([data], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'customers_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ Customers exported!', 'success');
+        }
+
+        function exportOrders() {
+            var data = JSON.stringify(orders, null, 2);
+            var blob = new Blob([data], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'orders_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ Orders exported!', 'success');
+        }
+
+        function exportProducts() {
+            var data = JSON.stringify(products, null, 2);
+            var blob = new Blob([data], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'products_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ Products exported!', 'success');
+        }
+
+        function importProducts(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        var maxId = products.reduce(function(max, p) { return Math.max(max, p.id); }, 0);
+                        for (var i = 0; i < imported.length; i++) {
+                            var p = imported[i];
+                            p.id = maxId + i + 1;
+                            if (!p.image_url) p.image_url = '';
+                            if (!p.image) p.image = 'fa-camera';
+                            if (!p.sku) p.sku = 'SKU-' + String(p.id).padStart(3, '0');
+                            products.push(p);
+                        }
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+                        renderAdminProducts();
+                        renderInventory();
+                        updateAdminStats();
+                        addNotification(imported.length + ' products imported', 'success');
+                        showToast('✅ ' + imported.length + ' products imported!', 'success');
+                        playNotificationSound('order');
+                    }
+                } catch (err) { showToast('❌ Invalid file', 'error'); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function backupData() {
+            var data = { products: products, orders: orders, users: users, notifications: notifications,
+                subscribers: subscribers, exportedAt: new Date().toISOString() };
+            var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'ad_full_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ Backup downloaded!', 'success');
+        }
+
+        function restoreData() { document.getElementById('import-file').click(); }
+
+        // ============================================
+        // NOTIFICATIONS
+        // ============================================
+        function addNotification(message, type) {
+            notifications.unshift({ id: Date.now(), message: message, time: 'Just now', read: false, type: type ||
+                    'info' });
+            localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
+            updateNotificationBadge();
+            var bell = document.querySelector('.fa-bell');
+            if (bell) { bell.classList.add('notif-bell-ring');
+                setTimeout(function() { bell.classList.remove('notif-bell-ring'); }, 500); }
+        }
+
+        function showNotifications() {
+            var modal = document.getElementById('notif-modal');
+            var list = document.getElementById('notif-list');
+            if (notifications.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-400 py-4">No notifications</div>';
+            } else {
+                var html = '';
+                for (var i = 0; i < notifications.length; i++) {
+                    var n = notifications[i];
+                    html += `
+                        <div class="flex items-start gap-3 glass-card p-3 rounded-xl ${!n.read ? 'border-l-2 border-blue-500' : ''}">
+                            <div class="flex-1"><div class="text-sm">${n.message}</div><div class="text-xs text-gray-400">${n.time}</div></div>
+                            ${!n.read ? '<button onclick="markNotificationRead(' + n.id + ')" class="text-blue-400 hover:text-blue-300 text-xs">Mark read</button>' : ''}
+                        </div>
+                    `;
+                }
+                list.innerHTML = html;
+            }
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeNotifModal() {
+            document.getElementById('notif-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function markNotificationRead(id) {
+            for (var i = 0; i < notifications.length; i++) { if (notifications[i].id === id) { notifications[i].read =
+                        true; break; } }
+            localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
+            updateNotificationBadge();
+            showNotifications();
+        }
+
+        // ============================================
+        // STATS
+        // ============================================
+        function updateAdminStats() {
+            document.getElementById('stat-products').textContent = products.length;
+            document.getElementById('stat-orders').textContent = orders.length;
+            document.getElementById('stat-pending').textContent = orders.filter(function(o) { return o.status ===
+                    'pending' || o.status === 'confirmed'; }).length;
+            document.getElementById('stat-customers').textContent = users.length;
+            document.getElementById('stat-subscribers').textContent = subscribers.length;
+            var revenue = 0;
+            for (var i = 0; i < orders.length; i++) {
+                var val = parseFloat(orders[i].total?.replace(/,/g, '').replace(/[^0-9.]/g, '') || 0);
+                if (!isNaN(val)) revenue += val;
+            }
+            document.getElementById('stat-revenue').textContent = revenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,
+                ",") + ' Br';
+        }
+
+        function updateAnalytics() {
+            var today = new Date().toISOString().split('T')[0];
+            var todayOrders = 0,
+                todayRevenue = 0;
+            for (var i = 0; i < orders.length; i++) {
+                if (orders[i].date === today) {
+                    todayOrders++;
+                    var val = parseFloat(orders[i].total?.replace(/,/g, '').replace(/[^0-9.]/g, '') || 0);
+                    if (!isNaN(val)) todayRevenue += val;
+                }
+            }
+            document.getElementById('today-orders').textContent = todayOrders;
+            document.getElementById('today-revenue').textContent = todayRevenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,
+                ",") + ' Br';
+            var weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            var newCustomers = 0;
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].joined && new Date(users[i].joined) >= weekAgo) newCustomers++;
+            }
+            document.getElementById('new-customers').textContent = newCustomers;
+        }
+
+        // ============================================
+        // ADD PRODUCT
+        // ============================================
+        function toggleAddForm() { document.getElementById('add-form').classList.toggle('hidden'); }
+
+        document.getElementById('admin-add-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var name = document.getElementById('prod-name').value.trim();
+            var price = document.getElementById('prod-price').value.trim();
+            var stock = document.getElementById('prod-stock').value.trim() || 'In Stock';
+            var category = document.getElementById('prod-category').value;
+            var rating = parseFloat(document.getElementById('prod-rating').value) || 4.5;
+            var sku = document.getElementById('prod-sku').value.trim() || 'SKU-' + String(products.length + 1)
+                .padStart(3, '0');
+            var desc = document.getElementById('prod-desc').value.trim() || 'High-quality product.';
+            var imageData = document.getElementById('prod-image').value;
+            var isBase64 = imageData && imageData.startsWith('data:image');
+            if (!name || !price) { showToast('Name and price required.', 'error'); return; }
+            var newProduct = {
+                id: products.length > 0 ? Math.max.apply(null, products.map(function(p) { return p.id; })) + 1 : 1,
+                name: name,
+                price: price,
+                image: isBase64 ? 'fa-image' : 'fa-camera',
+                image_url: isBase64 ? imageData : '',
+                stock: stock,
+                category: category,
+                rating: rating,
+                reviews: 0,
+                sku: sku,
+                description: desc
+            };
+            products.push(newProduct);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+            renderAdminProducts();
+            renderInventory();
+            updateAdminStats();
+            addNotification('New product: ' + name, 'success');
+            showToast('✅ ' + name + ' added!', 'success');
+            playNotificationSound('order');
+            this.reset();
+            document.getElementById('prod-image').value = '';
+            document.getElementById('prod-stock').value = 'In Stock';
+            document.getElementById('prod-rating').value = '4.5';
+            removeImage();
+            document.getElementById('add-form').classList.add('hidden');
+        });
+
+        // ============================================
+        // DELETE PRODUCT
+        // ============================================
+        function deleteProduct(id) {
+            if (!confirm('Delete this product?')) return;
+            var p = null;
+            for (var i = 0; i < products.length; i++) { if (products[i].id === id) { p = products[i]; break; } }
+            products = products.filter(function(pr) { return pr.id !== id; });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+            renderAdminProducts();
+            renderInventory();
+            updateAdminStats();
+            if (p) addNotification('Product deleted: ' + p.name, 'warning');
+            showToast('Product deleted', 'warning');
+        }
+
+        // ============================================
+        // EDIT PRODUCT
+        // ============================================
+        function editProduct(id) {
+            var p = null;
+            for (var i = 0; i < products.length; i++) { if (products[i].id === id) { p = products[i]; break; } }
+            if (!p) return;
+            document.getElementById('prod-name').value = p.name;
+            document.getElementById('prod-price').value = p.price;
+            document.getElementById('prod-stock').value = p.stock || 'In Stock';
+            document.getElementById('prod-category').value = p.category || 'cctv';
+            document.getElementById('prod-rating').value = p.rating || 4.5;
+            document.getElementById('prod-sku').value = p.sku || '';
+            document.getElementById('prod-desc').value = p.description || '';
+            if (p.image_url && p.image_url.startsWith('data:image')) {
+                document.getElementById('product-image-preview').src = p.image_url;
+                document.getElementById('image-preview').classList.remove('hidden');
+                document.getElementById('image-upload-area').classList.add('hidden');
+                document.getElementById('prod-image').value = p.image_url;
+                uploadedImageData = p.image_url;
+            } else { removeImage(); }
+            document.getElementById('add-form').classList.remove('hidden');
+            var form = document.getElementById('admin-add-form');
+            var submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Update Product';
+            var newForm = form.cloneNode(true);
+            form.parentNode.replaceChild(newForm, form);
+            newForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                p.name = document.getElementById('prod-name').value.trim();
+                p.price = document.getElementById('prod-price').value.trim();
+                p.stock = document.getElementById('prod-stock').value.trim() || 'In Stock';
+                p.category = document.getElementById('prod-category').value;
+                p.rating = parseFloat(document.getElementById('prod-rating').value) || 4.5;
+                p.sku = document.getElementById('prod-sku').value.trim() || p.sku;
+                p.description = document.getElementById('prod-desc').value.trim() || 'High-quality product.';
+                var imageData = document.getElementById('prod-image').value;
+                var isBase64 = imageData && imageData.startsWith('data:image');
+                p.image = isBase64 ? 'fa-image' : 'fa-camera';
+                p.image_url = isBase64 ? imageData : '';
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+                renderAdminProducts();
+                renderInventory();
+                updateAdminStats();
+                addNotification('Product updated: ' + p.name, 'info');
+                showToast('✅ ' + p.name + ' updated!', 'success');
+                playNotificationSound('service');
+                document.getElementById('add-form').classList.add('hidden');
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-price').value = '';
+                document.getElementById('prod-stock').value = 'In Stock';
+                document.getElementById('prod-rating').value = '4.5';
+                removeImage();
+                var btn = document.getElementById('admin-add-form').querySelector('button[type="submit"]');
+                btn.textContent = 'Add Product';
+            });
+            showToast('Editing: ' + p.name, 'warning');
+        }
+
+        // ============================================
+        // CHARTS
+        // ============================================
+        var salesChartInstance = null;
+        var categoryChartInstance = null;
+
+        function initCharts() {
+            var salesCtx = document.getElementById('salesChart').getContext('2d');
+            if (salesChartInstance) salesChartInstance.destroy();
+            salesChartInstance = new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{ label: 'Sales (Br)', data: [54000, 85500, 36000, 94500, 72000, 112500, 81000],
+                        borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.4,
+                        fill: true }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#9ca3af',
+                            font: { size: 12 } } } }, scales: { x: { ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(255,255,255,0.05)' } } } }
+            });
+            var categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            if (categoryChartInstance) categoryChartInstance.destroy();
+            categoryChartInstance = new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: { labels: ['CCTV', 'Time Attendance', 'Video Intercom', 'Network'],
+                    datasets: [{ data: [40, 25, 20, 15], backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6',
+                            '#f59e0b'
+                        ], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom',
+                            labels: { color: '#9ca3af', font: { size: 11 }, padding: 15 } } } }
+            });
+        }
+
+        // ============================================
+        // SETTINGS
+        // ============================================
+        function saveSettings() { showToast('✅ Settings saved!', 'success');
+            addNotification('Settings updated', 'info'); }
+
+        function clearAllData() {
+            if (!confirm('⚠️ Delete ALL data?')) return;
+            if (!confirm('⚠️ FINAL WARNING: Cannot be undone!')) return;
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(ORDERS_KEY);
+            localStorage.removeItem(USERS_KEY);
+            localStorage.removeItem(NOTIFICATIONS_KEY);
+            localStorage.removeItem(SUBSCRIBERS_KEY);
+            localStorage.removeItem('andu_cart');
+            localStorage.removeItem('andu_service_requests');
+            localStorage.removeItem('andu_current_user');
+            products = getDefaultProducts();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+            orders = [];
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+            users = [];
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            notifications = [];
+            localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
+            subscribers = [];
+            localStorage.setItem(SUBSCRIBERS_KEY, JSON.stringify(subscribers));
+            renderAdminProducts();
+            renderAdminOrders();
+            renderCustomers();
+            renderInventory();
+            renderDashboard();
+            updateAdminStats();
+            updateAnalytics();
+            initCharts();
+            updateNotificationBadge();
+            showToast('🗑️ All data cleared', 'warning');
+        }
+
+        // ============================================
+        // TABS
+        // ============================================
+        function switchTab(tab) {
+            var tabs = document.querySelectorAll('.tab-btn');
+            for (var i = 0; i < tabs.length; i++) {
+                var t = tabs[i];
+                t.className = 'tab-btn px-4 py-2 text-sm font-medium ' + (t.dataset.tab === tab ? 'tab-active' :
+                    'tab-inactive');
+            }
+            var contents = document.querySelectorAll('.tab-content');
+            for (var i = 0; i < contents.length; i++) { contents[i].classList.add('hidden'); }
+            document.getElementById(tab + '-tab').classList.remove('hidden');
+            if (tab === 'orders') renderAdminOrders();
+            if (tab === 'inventory') renderInventory();
+            if (tab === 'customers') renderCustomers();
+            if (tab === 'dashboard') renderDashboard();
+            if (tab === 'services') checkServiceRequests();
+        }
+
+        // ============================================
+        // SEARCH
+        // ============================================
+        document.getElementById('search-products')?.addEventListener('input', function() { renderAdminProducts(); });
+        document.getElementById('search-customers')?.addEventListener('input', function() { renderCustomers(); });
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, type, duration) {
+            type = type || 'success';
+            duration = duration || 4000;
+            var toast = document.getElementById('toast');
+            var msgEl = document.getElementById('toast-message');
+            var configs = {
+                success: { class: 'toast-success', icon: 'fa-check-circle' },
+                error: { class: 'toast-error', icon: 'fa-times-circle' },
+                warning: { class: 'toast-warning', icon: 'fa-exclamation-triangle' }
+            };
+            var cfg = configs[type] || configs.success;
+            toast.className = 'toast ' + cfg.class;
+            msgEl.textContent = message;
+            document.querySelector('.toast-icon i').className = 'fas ' + cfg.icon;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(function() { toast.classList.remove('show'); }, duration);
+        }
+
+        // ============================================
+        // KEYBOARD SHORTCUTS
+        // ============================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('add-form').classList.add('hidden');
+                closeNotifModal();
+                var modals = document.querySelectorAll('.modal-overlay.active');
+                for (var i = 0; i < modals.length; i++) { modals[i].classList.remove('active');
+                    document.body.style.overflow = ''; }
+            }
+            if (e.key === 'l' && e.ctrlKey && e.shiftKey) { e.preventDefault();
+                logoutAdmin(); }
+            if (e.key === 'n' && e.ctrlKey) { e.preventDefault();
+                showNotifications(); }
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+        console.log('🔐 AD Security Admin Panel v6.0');
+        console.log('👤 Default: admin / andu2026');
+        console.log('📦 Data in localStorage');
+        console.log('🔔 Sound notifications enabled');
+        console.log('⌨️  Ctrl+Shift+L logout | Ctrl+N notifications');
+        console.log('✅ Dark form inputs fixed');
+        console.log('🔄 Customer data synced with storefront (andu_users)');
+        console.log('❌ Compare feature removed');
+        console.log('⚡ Quick Order orders marked in admin');
+    </script>
+</body>
+</html>

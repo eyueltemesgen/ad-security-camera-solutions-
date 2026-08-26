@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AD Security Camera & Networking</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* ----- reset & base ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0b0e14;
+            color: #f0f4ff;
+        }
+
+        /* ----- glass ----- */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .glass-card {
+            background: rgba(20, 27, 40, 0.55);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s;
+        }
+        .glass-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 48px -16px rgba(26, 91, 255, 0.2);
+            border-color: rgba(26, 91, 255, 0.2);
+        }
+
+        /* ----- buttons ----- */
+        .btn-primary {
+            background: linear-gradient(145deg, #1a5bff, #0a3bb5);
+            transition: all 0.2s;
+            border: none;
+            color: #fff;
+            padding: 0.6rem 1.8rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(26, 91, 255, 0.25);
+        }
+        .btn-primary:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 32px rgba(26, 91, 255, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(145deg, #10b981, #059669);
+            transition: all 0.2s;
+            border: none;
+            color: #fff;
+            padding: 0.6rem 1.8rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+        }
+        .btn-success:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+        }
+        .btn-orange {
+            background: linear-gradient(145deg, #f97316, #ea580c);
+            transition: all 0.2s;
+            border: none;
+            color: #fff;
+            padding: 0.6rem 1.8rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+        }
+        .btn-orange:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 32px rgba(249, 115, 22, 0.45);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.2s;
+            color: #fff;
+            padding: 0.6rem 1.8rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #1a5bff;
+        }
+
+        /* ----- Improved button styles for product cards ----- */
+        .btn-add-cart {
+            background: linear-gradient(145deg, #1a5bff, #0a3bb5);
+            transition: all 0.25s;
+            border: none;
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            box-shadow: 0 4px 16px rgba(26, 91, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            flex: 1;
+        }
+        .btn-add-cart:hover {
+            transform: scale(1.04);
+            box-shadow: 0 6px 24px rgba(26, 91, 255, 0.4);
+        }
+        .btn-add-cart i {
+            font-size: 0.85rem;
+        }
+
+        .btn-place-order {
+            background: linear-gradient(145deg, #8b5cf6, #6d28d9);
+            transition: all 0.25s;
+            border: none;
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            flex: 1;
+        }
+        .btn-place-order:hover {
+            transform: scale(1.04);
+            box-shadow: 0 6px 24px rgba(139, 92, 246, 0.4);
+        }
+        .btn-place-order i {
+            font-size: 0.85rem;
+        }
+
+        .btn-wishlist {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.25s;
+            color: #9ca3af;
+            padding: 0.5rem 0.6rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-wishlist:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .btn-wishlist.active {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #7aa9ff, #3b7bff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .bg-gradient-hero {
+            background: radial-gradient(circle at 20% 30%, rgba(26, 91, 255, 0.12), transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(26, 91, 255, 0.07), transparent 50%),
+                #0b0e14;
+        }
+        .service-card {
+            border-left: 3px solid #1a5bff;
+            padding-left: 1rem;
+        }
+        .service-card:hover {
+            border-left-color: #f97316;
+        }
+
+        /* ----- badges ----- */
+        .stock-badge {
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .stock-in {
+            background: #10b98120;
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .stock-low {
+            background: #f59e0b20;
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        /* ===== DARK FORM INPUTS ===== */
+        .form-input {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #f0f4ff !important;
+            transition: all 0.25s;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #1a5bff !important;
+            box-shadow: 0 0 0 3px rgba(26, 91, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+        .form-input option {
+            background: #1a1f2e !important;
+            color: #f0f4ff !important;
+        }
+        .form-input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 1000px #1a1f2e inset !important;
+            -webkit-text-fill-color: #f0f4ff !important;
+        }
+        .form-input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #1a1f2e inset !important;
+            -webkit-text-fill-color: #f0f4ff !important;
+        }
+
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25rem;
+            padding-right: 2.5rem;
+        }
+
+        textarea.form-input {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #f0f4ff !important;
+            min-height: 60px;
+        }
+        textarea.form-input:focus {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: #1a5bff !important;
+        }
+        textarea.form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+
+        /* ----- toast ----- */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+            transform: translateY(120px);
+            opacity: 0;
+            transition: all 0.5s;
+            max-width: 440px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast-success {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        .toast-success .toast-icon {
+            color: #10b981;
+        }
+        .toast-error {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .toast-error .toast-icon {
+            color: #ef4444;
+        }
+        .toast-warning {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+        .toast-warning .toast-icon {
+            color: #f59e0b;
+        }
+
+        /* ----- modals ----- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 900;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 2rem;
+            animation: modalIn 0.35s;
+        }
+        .modal-content-wide {
+            max-width: 900px;
+        }
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.94) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* ----- cart badge ----- */
+        .cart-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: #fff;
+            border-radius: 999px;
+            font-size: 0.6rem;
+            padding: 0.1rem 0.45rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2.5px;
+            background: linear-gradient(to right, #1a5bff, #7aa9ff);
+            transition: width 0.3s;
+            border-radius: 2px;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* ----- social icons ----- */
+        .social-app-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .social-app-icon:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .instagram {
+            background: radial-gradient(circle at 30% 110%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+        }
+        .telegram {
+            background: linear-gradient(145deg, #0088cc, #0077b5);
+        }
+        .tiktok {
+            background: linear-gradient(145deg, #00f2ea, #ff0050);
+        }
+
+        .product-image-container {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #1a1f2e;
+        }
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .product-image-container .icon-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #141b28;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #1a5bff, #0a3bb5);
+            border-radius: 10px;
+        }
+
+        @media (max-width:640px) {
+            .product-image-container {
+                height: 140px;
+            }
+            .btn-add-cart,
+            .btn-place-order {
+                font-size: 0.65rem;
+                padding: 0.4rem 0.5rem;
+            }
+            .btn-add-cart i,
+            .btn-place-order i {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Rating stars */
+        .rating-stars {
+            color: #fbbf24;
+            letter-spacing: 1px;
+        }
+
+        /* Quick order summary */
+        .quick-order-summary {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="glass border-b border-white/5 px-4 sm:px-6 lg:px-8 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between h-16">
+        <div class="flex items-center space-x-3">
+            <a href="#home" class="flex items-center group">
+                <div class="relative">
+                    <img src="logo.jpg" alt="AD Security Camera" 
+                         style="height: 48px; width: 48px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(26, 91, 255, 0.4); box-shadow: 0 0 30px rgba(26, 91, 255, 0.2); transition: all 0.3s;" />
+                </div>
+                <div style="margin-left: 12px;">
+                    <span style="font-size: 22px; font-weight: 800; color: white;">
+                        <span style="background: linear-gradient(to right, #7aa9ff, #1a5bff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AD</span> Security
+                    </span>
+                    <div style="font-size: 10px; color: #9ca3af; letter-spacing: 1px; margin-top: -2px;">
+                        Camera & Networking
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="hidden md:flex items-center space-x-7 text-sm font-medium">
+            <a href="#home" class="nav-link text-gray-300 hover:text-white">Home</a>
+            <a href="#services" class="nav-link text-gray-300 hover:text-white">Services</a>
+            <a href="#products" class="nav-link text-gray-300 hover:text-white">Products</a>
+            <a href="#about" class="nav-link text-gray-300 hover:text-white">About</a>
+            <a href="#contact" class="nav-link text-gray-300 hover:text-white">Contact</a>
+            <div class="relative cursor-pointer" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart text-xl text-gray-300 hover:text-white transition"></i>
+                <span id="nav-cart-count" class="cart-badge">0</span>
+            </div>
+            <button onclick="openAuthModal()" class="text-gray-300 hover:text-white transition" id="auth-btn">
+                <i class="fas fa-user text-xl"></i>
+            </button>
+        </div>
+        <button id="menu-btn" class="md:hidden text-white text-2xl focus:outline-none">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    <div id="mobile-menu" class="md:hidden hidden glass border-t border-white/5 py-4 px-2 flex flex-col space-y-3 text-sm">
+        <a href="#home" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">Home</a>
+        <a href="#services" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">Services</a>
+        <a href="#products" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">Products</a>
+        <a href="#about" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">About</a>
+        <a href="#contact" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5">Contact</a>
+        <button onclick="openAuthModal()" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 text-left">
+            <i class="fas fa-user mr-2"></i> My Account
+        </button>
+    </div>
+</nav>
+
+    <!-- ===== HERO ===== -->
+    <section id="home" class="bg-gradient-hero min-h-[85vh] flex items-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
+        </div>
+        <div class="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6">
+                <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-1.5 text-sm text-blue-300">
+
+                </div>
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
+                    <span class="text-gradient">Wellcome To </span><br />
+                    <span class="text-white"> AD Security Camera & Networking</span>
+                </h1>
+                <p class="text-lg text-gray-300 max-w-xl leading-relaxed">
+                    CCTV, access control, time attendance, video intercom, structured cabling, and IT solutions.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="#services" class="btn-primary">Our Services</a>
+                    <a href="#contact" class="btn-orange">Get a Quote</a>
+                    <a href="#products" class="btn-outline">Shop Products</a>
+                </div>
+                <div class="flex flex-wrap items-center gap-6 text-sm text-gray-400">
+                    <span><i class="fas fa-check-circle text-blue-500 mr-1.5"></i> 6+ Years</span>
+                    <span><i class="fas fa-check-circle text-blue-500 mr-1.5"></i> 1200+ Clients</span>
+                    <span><i class="fas fa-check-circle text-blue-500 mr-1.5"></i> Certified</span>
+                    <span><i class="fas fa-star text-yellow-500 mr-1.5"></i> 4.9/5 Rating</span>
+                </div>
+            </div>
+            <div class="flex justify-center lg:justify-end">
+                <div class="glass-card rounded-3xl p-10 border border-white/10">
+                    <div class="grid grid-cols-2 gap-6 text-center">
+                        <div><i class="fas fa-video text-4xl text-blue-400"></i><p class="text-xs text-gray-400 mt-2">CCTV</p></div>
+                        <div><i class="fas fa-network-wired text-4xl text-green-400"></i><p class="text-xs text-gray-400 mt-2">Network</p></div>
+                        <div><i class="fas fa-clock text-4xl text-yellow-400"></i><p class="text-xs text-gray-400 mt-2">Time Attendance</p></div>
+                        <div><i class="fas fa-door-open text-4xl text-purple-400"></i><p class="text-xs text-gray-400 mt-2">Video Intercom</p></div>
+                        <div class="col-span-2"><i class="fas fa-code text-4xl text-orange-400"></i><p class="text-xs text-gray-400 mt-2">Web &amp; IT Solutions</p></div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+    <!-- ===== SERVICES ===== -->
+<section id="services" class="py-20 px-4 sm:px-6 lg:px-8 bg-[#0b0e14]">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold">Our <span class="text-gradient">Services</span></h2>
+            <p class="text-gray-400 mt-2">End-to-end security and networking solutions</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- CCTV Systems -->
+            <div class="glass-card p-6 rounded-2xl service-card hover:border-blue-500/30 transition-all duration-300">
+                <div class="flex items-center gap-3 mb-3">
+                    <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-video text-xl text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">CCTV Systems</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4 ml-[52px]">Professional installation, repair, and maintenance for home &amp; business security.</p>
+                <div class="flex flex-wrap gap-2 mb-4 ml-[52px]">
+                    <span class="text-xs bg-blue-500/10 text-blue-300 px-2 py-1 rounded-full">Installation</span>
+                    <span class="text-xs bg-green-500/10 text-green-300 px-2 py-1 rounded-full">Repair</span>
+                    <span class="text-xs bg-yellow-500/10 text-yellow-300 px-2 py-1 rounded-full">Maintenance</span>
+                </div>
+                <button class="btn-primary w-full text-sm py-2 rounded-full" onclick="openServiceBooking('CCTV Systems')">Book Service →</button>
+            </div>
+
+            <!-- Network Solutions -->
+            <div class="glass-card p-6 rounded-2xl service-card hover:border-green-500/30 transition-all duration-300">
+                <div class="flex items-center gap-3 mb-3">
+                    <div style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-network-wired text-xl text-green-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Network Solutions</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4 ml-[52px]">Cabling, switching, WiFi, and optimization for reliable connectivity.</p>
+                <div class="flex flex-wrap gap-2 mb-4 ml-[52px]">
+                    <span class="text-xs bg-blue-500/10 text-blue-300 px-2 py-1 rounded-full">Cabling</span>
+                    <span class="text-xs bg-green-500/10 text-green-300 px-2 py-1 rounded-full">Configuration</span>
+                    <span class="text-xs bg-yellow-500/10 text-yellow-300 px-2 py-1 rounded-full">Optimization</span>
+                </div>
+                <button class="btn-primary w-full text-sm py-2 rounded-full" onclick="openServiceBooking('Network Solutions')">Book Service →</button>
+            </div>
+
+            <!-- Time Attendance -->
+            <div class="glass-card p-6 rounded-2xl service-card hover:border-yellow-500/30 transition-all duration-300">
+                <div class="flex items-center gap-3 mb-3">
+                    <div style="width: 40px; height: 40px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-clock text-xl text-yellow-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Time Attendance</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4 ml-[52px]">Biometric and face recognition systems for accurate workforce management.</p>
+                <div class="flex flex-wrap gap-2 mb-4 ml-[52px]">
+                    <span class="text-xs bg-blue-500/10 text-blue-300 px-2 py-1 rounded-full">Installation</span>
+                    <span class="text-xs bg-green-500/10 text-green-300 px-2 py-1 rounded-full">Sales</span>
+                    <span class="text-xs bg-yellow-500/10 text-yellow-300 px-2 py-1 rounded-full">Support</span>
+                </div>
+                <button class="btn-primary w-full text-sm py-2 rounded-full" onclick="openServiceBooking('Time Attendance')">Book Service →</button>
+            </div>
+
+            <!-- Video Intercom -->
+            <div class="glass-card p-6 rounded-2xl service-card hover:border-purple-500/30 transition-all duration-300">
+                <div class="flex items-center gap-3 mb-3">
+                    <div style="width: 40px; height: 40px; background: rgba(139, 92, 246, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-door-open text-xl text-purple-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Video Intercom</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4 ml-[52px]">Modern video intercom systems for secure access and visitor management.</p>
+                <div class="flex flex-wrap gap-2 mb-4 ml-[52px]">
+                    <span class="text-xs bg-blue-500/10 text-blue-300 px-2 py-1 rounded-full">Installation</span>
+                    <span class="text-xs bg-green-500/10 text-green-300 px-2 py-1 rounded-full">Sales</span>
+                    <span class="text-xs bg-yellow-500/10 text-yellow-300 px-2 py-1 rounded-full">Integration</span>
+                </div>
+                <button class="btn-primary w-full text-sm py-2 rounded-full" onclick="openServiceBooking('Video Intercom')">Book Service →</button>
+            </div>
+
+            <!-- Web & IT Solutions -->
+            <div class="glass-card p-6 rounded-2xl service-card hover:border-orange-500/30 transition-all duration-300">
+                <div class="flex items-center gap-3 mb-3">
+                    <div style="width: 40px; height: 40px; background: rgba(249, 115, 22, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-code text-xl text-orange-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Web &amp; IT Solutions</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4 ml-[52px]">Website development, e-commerce, and IT consulting for your business.</p>
+                <div class="flex flex-wrap gap-2 mb-4 ml-[52px]">
+                    <span class="text-xs bg-blue-500/10 text-blue-300 px-2 py-1 rounded-full">Design</span>
+                    <span class="text-xs bg-green-500/10 text-green-300 px-2 py-1 rounded-full">Development</span>
+                    <span class="text-xs bg-yellow-500/10 text-yellow-300 px-2 py-1 rounded-full">Consulting</span>
+                </div>
+                <button class="btn-primary w-full text-sm py-2 rounded-full" onclick="openServiceBooking('Web Development')">Book Service →</button>
+            </div>
+
+            <!-- Access Control -->
+            <div class="glass-card p-6 rounded-2xl service-card hover:border-red-500/30 transition-all duration-300">
+                <div class="flex items-center gap-3 mb-3">
+                    <div style="width: 40px; height: 40px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-shield-alt text-xl text-red-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Access Control</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4 ml-[52px]">Electronic door locks, keypad entry, and biometric access control systems.</p>
+                <div class="flex flex-wrap gap-2 mb-4 ml-[52px]">
+                    <span class="text-xs bg-blue-500/10 text-blue-300 px-2 py-1 rounded-full">Installation</span>
+                    <span class="text-xs bg-green-500/10 text-green-300 px-2 py-1 rounded-full">Integration</span>
+                    <span class="text-xs bg-yellow-500/10 text-yellow-300 px-2 py-1 rounded-full">Support</span>
+                </div>
+                <button class="btn-primary w-full text-sm py-2 rounded-full" onclick="openServiceBooking('Access Control')">Book Service →</button>
+            </div>
+
+        </div>
+    </div>
+</section>
+    <!-- ===== PRODUCTS ===== -->
+    <section id="products" class="py-20 px-4 sm:px-6 lg:px-8 bg-[#0f131c]">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold">Featured <span class="text-gradient">Products</span></h2>
+                <p class="text-gray-400 mt-2">Premium security and networking equipment</p>
+                <div class="flex flex-wrap justify-center gap-2 mt-4">
+                    <button onclick="filterProducts('all')" class="filter-btn px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-sm hover:bg-blue-500/30 transition">All</button>
+                    <button onclick="filterProducts('cctv')" class="filter-btn px-4 py-1.5 rounded-full bg-white/5 text-gray-400 text-sm hover:bg-white/10 transition">CCTV</button>
+                    <button onclick="filterProducts('attendance')" class="filter-btn px-4 py-1.5 rounded-full bg-white/5 text-gray-400 text-sm hover:bg-white/10 transition">Time Attendance</button>
+                    <button onclick="filterProducts('intercom')" class="filter-btn px-4 py-1.5 rounded-full bg-white/5 text-gray-400 text-sm hover:bg-white/10 transition">Intercom</button>
+                    <button onclick="filterProducts('network')" class="filter-btn px-4 py-1.5 rounded-full bg-white/5 text-gray-400 text-sm hover:bg-white/10 transition">Network</button>
+                </div>
+            </div>
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+
+    <!-- ===== ABOUT ===== -->
+    <section id="about" class="py-20 px-4 sm:px-6 lg:px-8 bg-[#0b0e14]">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-bold">About <span class="text-gradient">AD Security Camera & Networking</span></h2>
+                <p class="text-gray-300 mt-4 leading-relaxed">
+                    AD Security Camera &amp; Networking is a leading technology company in Ethiopia, specializing in
+                    CCTV, network infrastructure, time attendance, video intercom, and IT solutions.
+                    We deliver high-quality products and professional services to safeguard your business and home.
+                </p>
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-blue-400">6+</div>
+                        <div class="text-sm text-gray-400">Years Experience</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-blue-400">1200+</div>
+                        <div class="text-sm text-gray-400">Happy Customers</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-green-400">98%</div>
+                        <div class="text-sm text-gray-400">Satisfaction Rate</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-purple-400">24/7</div>
+                        <div class="text-sm text-gray-400">Support Available</div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card p-8 rounded-3xl">
+                <h3 class="text-xl font-semibold mb-4">Why Choose Us?</h3>
+                <div class="space-y-3">
+                    <div class="flex items-start gap-3"><i class="fas fa-check-circle text-blue-400 mt-1"></i><div><strong>Certified Technicians</strong><p class="text-sm text-gray-400">Expert professionals</p></div></div>
+                    <div class="flex items-start gap-3"><i class="fas fa-check-circle text-blue-400 mt-1"></i><div><strong>Genuine Products</strong><p class="text-sm text-gray-400">100% authentic</p></div></div>
+                    <div class="flex items-start gap-3"><i class="fas fa-check-circle text-blue-400 mt-1"></i><div><strong>Fast Service</strong><p class="text-sm text-gray-400">Quick response</p></div></div>
+                    <div class="flex items-start gap-3"><i class="fas fa-check-circle text-blue-400 mt-1"></i><div><strong>Warranty</strong><p class="text-sm text-gray-400">12-month guarantee</p></div></div>
+                    <div class="flex items-start gap-3"><i class="fas fa-check-circle text-blue-400 mt-1"></i><div><strong>Affordable Prices</strong><p class="text-sm text-gray-400">Competitive pricing</p></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact" class="py-20 px-4 sm:px-6 lg:px-8 bg-[#0f131c]">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-bold">Get in <span class="text-gradient">Touch</span></h2>
+                <p class="text-gray-400 mt-2">We're ready to help – reach out anytime.</p>
+                <div class="space-y-4 mt-6 text-gray-300">
+                    <p><i class="fas fa-building w-6 text-blue-400"></i> AD Security Camera & Networking, Addis Ababa, Ethiopia</p>
+                    <p><i class="fas fa-envelope w-6 text-blue-400"></i> adcctvcamera16@gmail.com</p>
+                    <p><i class="fas fa-phone w-6 text-blue-400"></i> +251 985 959 697</p>
+                    <p class="text-sm text-gray-400 ml-9">+251 918 109 779</p>
+                </div>
+                <div class="mt-6">
+                    <h4 class="text-sm font-semibold text-white mb-3">Connect With Us</h4>
+                    <div class="flex gap-4">
+                        <a href="https://instagram.com/adsecuritycamera" target="_blank" class="social-app-icon instagram text-white text-xl" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://t.me/adsecuritycamera" target="_blank" class="social-app-icon telegram text-white text-xl" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                        <a href="https://tiktok.com/@adsecuritycamera" target="_blank" class="social-app-icon tiktok text-white text-xl" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://facebook.com" target="_blank" class="social-app-icon" style="background:linear-gradient(145deg,#1877f2,#0d65d9);" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Click the icons to find us on your favourite apps</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl mt-6">
+                    <h4 class="font-semibold mb-2">Business Hours</h4>
+                    <p class="text-sm text-gray-400">Monday – Friday: 8:00 AM – 6:00 PM</p>
+                    <p class="text-sm text-gray-400">Saturday: 9:00 AM – 2:00 PM</p>
+                    <p class="text-sm text-gray-400">Sunday: Closed</p>
+                </div>
+            </div>
+            <div class="glass-card p-8 rounded-3xl">
+                <h3 class="text-xl font-semibold mb-4">Send a Message</h3>
+                <form id="contact-form" class="space-y-4" onsubmit="handleContactForm(event)">
+                    <input type="text" placeholder="Name" class="form-input" required />
+                    <input type="email" placeholder="Email" class="form-input" required />
+                    <input type="tel" placeholder="Phone" class="form-input" />
+                    <select class="form-input">
+                        <option value="">— Select Service —</option>
+                        <option value="CCTV Systems">CCTV Systems</option>
+                        <option value="Network Solutions">Network Solutions</option>
+                        <option value="Time Attendance">Time Attendance</option>
+                        <option value="Video Intercom">Video Intercom</option>
+                        <option value="Web Development">Web Development</option>
+                        <option value="Access Control">Access Control</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <textarea rows="4" placeholder="Message" class="form-input" required></textarea>
+                    <button type="submit" class="btn-orange w-full py-3 rounded-xl font-semibold text-white shadow-lg shadow-orange-500/20">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-[#080b10] border-t border-white/5 px-4 sm:px-6 lg:px-8 py-12">
+        <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+            <div>
+                <h5 class="font-semibold text-white mb-3">Quick Links</h5>
+                <div class="space-y-2 text-gray-400">
+                    <a href="#home" class="block hover:text-white transition">Home</a>
+                    <a href="#services" class="block hover:text-white transition">Services</a>
+                    <a href="#products" class="block hover:text-white transition">Products</a>
+                    <a href="#about" class="block hover:text-white transition">About</a>
+                    <a href="#contact" class="block hover:text-white transition">Contact</a>
+                </div>
+            </div>
+            <div>
+                <h5 class="font-semibold text-white mb-3">Services</h5>
+                <div class="space-y-2 text-gray-400">
+                    <a href="#" class="block hover:text-white transition">CCTV Systems</a>
+                    <a href="#" class="block hover:text-white transition">Network Solutions</a>
+                    <a href="#" class="block hover:text-white transition">Time Attendance</a>
+                    <a href="#" class="block hover:text-white transition">Video Intercom</a>
+                    <a href="#" class="block hover:text-white transition">Web &amp; IT</a>
+                </div>
+            </div>
+            <div>
+                <h5 class="font-semibold text-white mb-3">Products</h5>
+                <div class="space-y-2 text-gray-400">
+                    <a href="#" class="block hover:text-white transition">Cameras</a>
+                    <a href="#" class="block hover:text-white transition">Attendance Devices</a>
+                    <a href="#" class="block hover:text-white transition">Intercom Systems</a>
+                    <a href="#" class="block hover:text-white transition">Network Equipment</a>
+                </div>
+            </div>
+            <div>
+                <h5 class="font-semibold text-white mb-3">Follow Us</h5>
+                <div class="flex gap-4">
+                    <a href="https://instagram.com/adsecuritycamera" target="_blank" class="social-app-icon instagram text-white text-sm" style="width:36px;height:36px;" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://t.me/adsecuritycamera" target="_blank" class="social-app-icon telegram text-white text-sm" style="width:36px;height:36px;" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://tiktok.com/@adsecuritycamera" target="_blank" class="social-app-icon tiktok text-white text-sm" style="width:36px;height:36px;" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                </div>
+                <div class="mt-4">
+                    <h6 class="text-sm font-semibold text-white mb-2">Newsletter</h6>
+                    <div class="flex">
+                        <input type="email" id="newsletter-email" placeholder="Your email" class="flex-1 form-input rounded-l-xl rounded-r-none" />
+                        <button onclick="subscribeNewsletter()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-r-xl text-sm transition">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto mt-8 pt-6 border-t border-white/5 text-center text-gray-500 text-xs">
+            <p>&copy; 2026 AD Security Camera &amp; Networking. All Rights Reserved. |  +251 985 959 697 | +251 918 109 779</p>
+        </div>
+    </footer>
+
+    <!-- ===== AUTH MODAL ===== -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-6 relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-6 text-gray-400 hover:text-white text-3xl transition">&times;</button>
+            
+            <!-- Login Form -->
+            <div id="auth-login" class="auth-form">
+                <h2 class="text-2xl font-bold mb-6 text-center"><i class="fas fa-sign-in-alt mr-2 text-blue-400"></i> Welcome Back</h2>
+                <form id="login-form" class="space-y-4">
+                    <input type="email" id="login-email" placeholder="Email" class="form-input" required>
+                    <input type="password" id="login-password" placeholder="Password" class="form-input" required>
+                    <button type="submit" class="btn-primary w-full py-3 rounded-xl font-semibold">Login</button>
+                </form>
+                <p class="text-center text-sm text-gray-400 mt-4">Don't have an account? <button onclick="showRegister()" class="text-blue-400 hover:text-blue-300">Register</button></p>
+                <p id="login-error" class="text-red-400 text-sm text-center hidden mt-2">Invalid email or password</p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="auth-register" class="auth-form hidden">
+                <h2 class="text-2xl font-bold mb-6 text-center"><i class="fas fa-user-plus mr-2 text-green-400"></i> Create Account</h2>
+                <form id="register-form" class="space-y-4">
+                    <input type="text" id="reg-name" placeholder="Full Name" class="form-input" required>
+                    <input type="email" id="reg-email" placeholder="Email" class="form-input" required>
+                    <input type="tel" id="reg-phone" placeholder="Phone (optional)" class="form-input">
+                    <input type="password" id="reg-password" placeholder="Password (min 6 characters)" class="form-input" required minlength="6">
+                    <input type="password" id="reg-confirm" placeholder="Confirm Password" class="form-input" required>
+                    <button type="submit" class="btn-success w-full py-3 rounded-xl font-semibold">Register</button>
+                </form>
+                <p class="text-center text-sm text-gray-400 mt-4">Already have an account? <button onclick="showLogin()" class="text-blue-400 hover:text-blue-300">Login</button></p>
+                <p id="register-error" class="text-red-400 text-sm text-center hidden mt-2"></p>
+            </div>
+
+            <!-- Dashboard -->
+            <div id="auth-dashboard" class="auth-form hidden">
+                <h2 class="text-2xl font-bold mb-4 text-center"><i class="fas fa-user-circle mr-2 text-blue-400"></i> My Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-blue-400" id="dash-orders">0</div>
+                        <div class="text-sm text-gray-400">Orders</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-red-400" id="dash-wishlist">0</div>
+                        <div class="text-sm text-gray-400">Wishlist</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-green-400" id="dash-reviews">0</div>
+                        <div class="text-sm text-gray-400">Reviews</div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Recent Orders</h4>
+                    <div id="dash-orders-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="logoutUser()" class="bg-red-500 hover:bg-red-600 w-full py-2 rounded-xl font-semibold text-white transition">Logout</button>
+                    <button onclick="closeAuthModal()" class="btn-outline w-full py-2 rounded-xl font-semibold">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SERVICE BOOKING MODAL ===== -->
+    <div id="service-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-6 relative">
+            <button onclick="closeServiceModal()" class="absolute top-4 right-6 text-gray-400 hover:text-white text-3xl transition">&times;</button>
+            <h2 class="text-2xl font-bold mb-4"><i class="fas fa-tools mr-2 text-blue-400"></i> Book Service</h2>
+            <p class="text-sm text-gray-400 mb-4">Fill in your details and we'll contact you shortly</p>
+            <form id="service-booking-form" class="space-y-4" onsubmit="submitServiceBooking(event)">
+                <input type="text" id="service-name" placeholder="Full Name *" class="form-input" required>
+                <input type="email" id="service-email" placeholder="Email *" class="form-input" required>
+                <input type="tel" id="service-phone" placeholder="Phone" class="form-input">
+                <input type="text" id="service-type" class="form-input bg-white/5 border border-white/10 text-white" readonly>
+                <textarea id="service-message" rows="3" placeholder="Additional details..." class="form-input"></textarea>
+                <button type="submit" class="btn-orange w-full py-3 rounded-xl font-semibold text-white shadow-lg shadow-orange-500/20">
+                    <i class="fas fa-paper-plane mr-2"></i> Submit Booking
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== PRODUCT DETAIL MODAL ===== -->
+    <div id="product-modal" class="modal-overlay">
+        <div class="modal-content modal-content-wide glass-card p-6 relative">
+            <button onclick="closeProductModal()" class="absolute top-4 right-6 text-gray-400 hover:text-white text-3xl transition">&times;</button>
+            <div id="product-modal-body" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+        </div>
+    </div>
+
+    <!-- ===== QUICK ORDER MODAL ===== -->
+    <div id="quick-order-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-6 relative">
+            <button onclick="closeQuickOrder()" class="absolute top-4 right-6 text-gray-400 hover:text-white text-3xl transition">&times;</button>
+            <h2 class="text-2xl font-bold mb-4"><i class="fas fa-bolt mr-2 text-purple-400"></i> Place Quick Order</h2>
+            <p class="text-sm text-gray-400 mb-4">Order this product immediately without adding to cart</p>
+            <div id="quick-order-details" class="quick-order-summary mb-4 p-4 rounded-xl bg-white/5">
+                <div class="flex items-center gap-4">
+                    <div id="quick-order-image" class="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center overflow-hidden">
+                        <i class="fas fa-camera text-2xl text-blue-400/60"></i>
+                    </div>
+                    <div>
+                        <h3 id="quick-order-name" class="font-semibold text-lg">Product Name</h3>
+                        <p id="quick-order-price" class="text-orange-400 font-bold text-xl">0 Br</p>
+                    </div>
+                </div>
+            </div>
+            <form id="quick-order-form" class="space-y-4" onsubmit="submitQuickOrder(event)">
+                <input type="hidden" id="quick-product-id" value="">
+                <input type="text" id="quick-name" placeholder="Full Name *" class="form-input" required>
+                <input type="email" id="quick-email" placeholder="Email *" class="form-input" required>
+                <input type="tel" id="quick-phone" placeholder="Phone *" class="form-input" required>
+                <textarea id="quick-address" rows="2" placeholder="Delivery Address *" class="form-input" required></textarea>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="quick-quantity" placeholder="Qty" class="form-input" value="1" min="1" required>
+                    <select id="quick-payment" class="form-input">
+                        <option value="telebirr">Telebirr</option>
+                        <option value="cbebirr">CBE Birr</option>
+                        <option value="chapa">Chapa</option>
+                        <option value="cod">Cash on Delivery</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-place-order w-full py-3 rounded-xl font-semibold text-white shadow-lg shadow-purple-500/20" style="flex: none; font-size: 1rem;">
+                    <i class="fas fa-check-circle mr-2"></i> Place Order Now
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== CART PANEL ===== -->
+    <div id="cart-panel" class="modal-overlay" style="display:none;">
+        <div class="modal-content glass-card p-6 relative max-w-3xl">
+            <button onclick="toggleCart()" class="absolute top-4 right-6 text-gray-400 hover:text-white text-3xl transition">&times;</button>
+            <h2 class="text-2xl font-bold mb-4"><i class="fas fa-shopping-cart mr-2 text-blue-400"></i> Shopping Cart</h2>
+            <div id="cart-items" class="space-y-3 max-h-[50vh] overflow-y-auto"></div>
+            <div id="cart-empty" class="text-center py-8 text-gray-400">
+                <i class="fas fa-shopping-cart text-6xl mb-4 opacity-30"></i>
+                <p>Your cart is empty</p>
+                <button onclick="toggleCart()" class="mt-4 text-blue-400 hover:text-blue-300 transition">Continue Shopping</button>
+            </div>
+            <div id="cart-details" class="hidden">
+                <div class="border-t border-white/10 pt-4 mt-4">
+                    <div class="space-y-1.5 text-sm">
+                        <div class="flex justify-between"><span class="text-gray-400">Subtotal:</span><span id="cart-subtotal">0.00 Br</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">VAT (15%):</span><span id="cart-tax">0.00 Br</span></div>
+                        <div class="flex justify-between text-lg font-bold pt-2 border-t border-white/10">
+                            <span>Total:</span><span id="cart-total-amount" class="text-orange-400">0.00 Br</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-success w-full mt-4 py-3 rounded-xl font-semibold" onclick="openCheckout()">
+                    <i class="fas fa-credit-card mr-2"></i> Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CHECKOUT MODAL ===== -->
+    <div id="checkout-modal" class="modal-overlay">
+        <div class="modal-content glass-card p-6 relative max-w-4xl">
+            <button onclick="closeCheckout()" class="absolute top-4 right-6 text-gray-400 hover:text-white text-3xl transition">&times;</button>
+            <h2 class="text-2xl font-bold mb-6"><i class="fas fa-credit-card mr-2 text-blue-400"></i> Checkout</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold mb-3">Shipping Information</h3>
+                    <form id="checkout-form" class="space-y-3">
+                        <input type="text" id="checkout-name" placeholder="Full Name" class="form-input" required>
+                        <input type="email" id="checkout-email" placeholder="Email" class="form-input" required>
+                        <input type="tel" id="checkout-phone" placeholder="Phone" class="form-input" required>
+                        <textarea id="checkout-address" rows="2" placeholder="Delivery Address" class="form-input" required></textarea>
+                    </form>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-3">Payment Method</h3>
+                    <div class="space-y-3">
+                        <div class="glass-card p-4 rounded-xl cursor-pointer hover:border-blue-500 transition payment-option" onclick="selectPayment('telebirr')" data-method="telebirr">
+                            <div class="flex items-center gap-3"><input type="radio" name="payment" value="telebirr" class="accent-blue-500 w-4 h-4" /><i class="fas fa-mobile-alt text-2xl text-green-400"></i><span>Telebirr</span></div>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl cursor-pointer hover:border-blue-500 transition payment-option" onclick="selectPayment('cbebirr')" data-method="cbebirr">
+                            <div class="flex items-center gap-3"><input type="radio" name="payment" value="cbebirr" class="accent-blue-500 w-4 h-4" /><i class="fas fa-university text-2xl text-yellow-400"></i><span>CBE Birr</span></div>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl cursor-pointer hover:border-blue-500 transition payment-option" onclick="selectPayment('chapa')" data-method="chapa">
+                            <div class="flex items-center gap-3"><input type="radio" name="payment" value="chapa" class="accent-blue-500 w-4 h-4" /><i class="fas fa-credit-card text-2xl text-purple-400"></i><span>Chapa</span></div>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl cursor-pointer hover:border-blue-500 transition payment-option" onclick="selectPayment('cod')" data-method="cod">
+                            <div class="flex items-center gap-3"><input type="radio" name="payment" value="cod" class="accent-blue-500 w-4 h-4" /><i class="fas fa-hand-holding-usd text-2xl text-orange-400"></i><span>Cash on Delivery</span></div>
+                        </div>
+                    </div>
+                    <div id="payment-details" class="mt-4 glass-card p-4 rounded-xl hidden">
+                        <p class="text-sm text-gray-400">Payment instructions will appear here</p>
+                    </div>
+                    <button class="btn-success w-full mt-4 py-3 rounded-xl font-semibold" onclick="placeOrder()">
+                        <i class="fas fa-check-circle mr-2"></i> Place Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast">
+        <div class="flex items-center gap-3">
+            <span class="toast-icon text-xl"><i class="fas fa-check-circle"></i></span>
+            <span id="toast-message" class="text-sm font-medium">Success!</span>
+        </div>
+    </div>
+
+    <!-- ===== BACK TO TOP ===== -->
+    <button id="back-top" class="fixed bottom-24 right-6 z-40 bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-full shadow-2xl transition-all duration-300 opacity-0 invisible hover:scale-105">
+        <i class="fas fa-arrow-up text-lg"></i>
+    </button>
+
+    <!-- ===== CHAT BUTTON ===== -->
+    <button class="fixed bottom-6 right-6 z-40 bg-gradient-to-br from-blue-600 to-blue-500 p-4 rounded-full shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer" onclick="openChat()">
+        <i class="fas fa-comment-dots text-white text-2xl"></i>
+    </button>
+
+    <!-- ============================================ -->
+    <!-- ===== JAVASCRIPT ===== -->
+    <!-- ============================================ -->
+    <script>
+        // ============================================
+        // SOUND SYSTEM
+        // ============================================
+        var soundEnabled = true;
+
+        function playNotificationSound(type) {
+            if (!soundEnabled) return;
+            try {
+                var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                if (type === 'order') {
+                    var frequencies = [523, 659, 784, 1047];
+                    frequencies.forEach(function(freq, index) {
+                        setTimeout(function() {
+                            var oscillator = audioCtx.createOscillator();
+                            var gainNode = audioCtx.createGain();
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioCtx.destination);
+                            oscillator.frequency.value = freq;
+                            oscillator.type = 'sine';
+                            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                            oscillator.start(audioCtx.currentTime);
+                            oscillator.stop(audioCtx.currentTime + 0.3);
+                        }, index * 100);
+                    });
+                } else if (type === 'service') {
+                    [880, 1100].forEach(function(freq, index) {
+                        setTimeout(function() {
+                            var oscillator = audioCtx.createOscillator();
+                            var gainNode = audioCtx.createGain();
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioCtx.destination);
+                            oscillator.frequency.value = freq;
+                            oscillator.type = 'sine';
+                            gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                            oscillator.start(audioCtx.currentTime);
+                            oscillator.stop(audioCtx.currentTime + 0.15);
+                        }, index * 200);
+                    });
+                } else if (type === 'customer') {
+                    var oscillator = audioCtx.createOscillator();
+                    var gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.frequency.value = 1200;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.2);
+                }
+            } catch (e) { console.log('Sound not available'); }
+        }
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, type, duration) {
+            type = type || 'success';
+            duration = duration || 4000;
+            var toast = document.getElementById('toast');
+            var msgEl = document.getElementById('toast-message');
+            var configs = {
+                success: { class: 'toast-success', icon: 'fa-check-circle' },
+                error: { class: 'toast-error', icon: 'fa-times-circle' },
+                warning: { class: 'toast-warning', icon: 'fa-exclamation-triangle' }
+            };
+            var cfg = configs[type] || configs.success;
+            toast.className = 'toast ' + cfg.class;
+            msgEl.textContent = message;
+            document.querySelector('.toast-icon i').className = 'fas ' + cfg.icon;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(function() {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // ============================================
+        // AUTH
+        // ============================================
+        var USERS_KEY = 'andu_users';
+        var currentUser = null;
+
+        function getUsers() {
+            var raw = localStorage.getItem(USERS_KEY);
+            if (raw) { try { return JSON.parse(raw); } catch (e) {} }
+            return [];
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        function checkAuth() {
+            var saved = localStorage.getItem('andu_current_user');
+            if (saved) {
+                try { currentUser = JSON.parse(saved);
+                    updateAuthUI(); return true; } catch (e) {}
+            }
+            return false;
+        }
+
+        function updateAuthUI() {
+            var btn = document.getElementById('auth-btn');
+            if (currentUser) {
+                btn.innerHTML = '<i class="fas fa-user-circle text-xl"></i>';
+                btn.title = currentUser.name || 'My Account';
+            } else {
+                btn.innerHTML = '<i class="fas fa-user text-xl"></i>';
+                btn.title = 'Login / Register';
+            }
+        }
+
+        function openAuthModal() {
+            if (currentUser) { showDashboard(); return; }
+            document.getElementById('auth-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            showLogin();
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function showLogin() {
+            document.getElementById('auth-login').classList.remove('hidden');
+            document.getElementById('auth-register').classList.add('hidden');
+            document.getElementById('auth-dashboard').classList.add('hidden');
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('auth-login').classList.add('hidden');
+            document.getElementById('auth-register').classList.remove('hidden');
+            document.getElementById('auth-dashboard').classList.add('hidden');
+            document.getElementById('register-error').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            if (!currentUser) { showLogin(); return; }
+            document.getElementById('auth-login').classList.add('hidden');
+            document.getElementById('auth-register').classList.add('hidden');
+            document.getElementById('auth-dashboard').classList.remove('hidden');
+            var orders = JSON.parse(localStorage.getItem('andu_orders') || '[]');
+            var userOrders = orders.filter(function(o) { return o.email === currentUser.email; });
+            document.getElementById('dash-orders').textContent = userOrders.length;
+            document.getElementById('dash-wishlist').textContent = JSON.parse(localStorage.getItem('andu_wishlist') || '[]')
+                .length;
+            var allReviews = JSON.parse(localStorage.getItem('andu_reviews') || '{}');
+            var userReviews = 0;
+            for (var key in allReviews) { if (allReviews.hasOwnProperty(key)) { userReviews += allReviews[key].length; } }
+            document.getElementById('dash-reviews').textContent = userReviews;
+            var list = document.getElementById('dash-orders-list');
+            if (userOrders.length === 0) {
+                list.innerHTML = '<div class="text-gray-400 text-sm">No orders yet</div>';
+            } else {
+                list.innerHTML = userOrders.slice(0, 5).map(function(o) {
+                    return `<div class="flex items-center justify-between bg-white/5 p-2 rounded-lg text-sm">
+                                <div><span class="font-semibold">#${o.id}</span><span class="text-gray-400 ml-2">${o.date}</span></div>
+                                <div><span class="text-orange-400">${o.total}</span><span class="status-badge status-${o.status} ml-2">${o.status}</span></div>
+                            </div>`;
+                }).join('');
+            }
+        }
+
+        // ============================================
+        // LOGIN
+        // ============================================
+        document.getElementById('login-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var email = document.getElementById('login-email').value.trim();
+            var password = document.getElementById('login-password').value;
+            var users = getUsers();
+            var user = users.find(function(u) { return u.email === email && u.password === password; });
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('andu_current_user', JSON.stringify(user));
+                updateAuthUI();
+                closeAuthModal();
+                showToast('Welcome back, ' + user.name + '! 🎉', 'success');
+                playNotificationSound('customer');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
+
+        // ============================================
+        // REGISTER
+        // ============================================
+        document.getElementById('register-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var name = document.getElementById('reg-name').value.trim();
+            var email = document.getElementById('reg-email').value.trim();
+            var phone = document.getElementById('reg-phone').value.trim();
+            var password = document.getElementById('reg-password').value;
+            var confirm = document.getElementById('reg-confirm').value;
+            var errorEl = document.getElementById('register-error');
+
+            if (password !== confirm) {
+                errorEl.textContent = 'Passwords do not match';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            if (password.length < 6) {
+                errorEl.textContent = 'Password must be at least 6 characters';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            var users = getUsers();
+            if (users.find(function(u) { return u.email === email; })) {
+                errorEl.textContent = 'Email already registered';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            var newUser = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                phone: phone || '',
+                password: password,
+                joined: new Date().toISOString().split('T')[0]
+            };
+
+            users.push(newUser);
+            saveUsers(users);
+
+            currentUser = newUser;
+            localStorage.setItem('andu_current_user', JSON.stringify(newUser));
+            updateAuthUI();
+            closeAuthModal();
+            showToast('Account created successfully! 🎉', 'success');
+            playNotificationSound('customer');
+        });
+
+        function logoutUser() {
+            currentUser = null;
+            localStorage.removeItem('andu_current_user');
+            updateAuthUI();
+            closeAuthModal();
+            showToast('Logged out successfully', 'warning');
+        }
+
+        // ============================================
+        // SERVICE BOOKING
+        // ============================================
+        var currentService = '';
+
+        function openServiceBooking(serviceName) {
+            if (!currentUser) { showToast('Please login to book a service', 'warning');
+                openAuthModal(); return; }
+            currentService = serviceName;
+            document.getElementById('service-type').value = serviceName;
+            document.getElementById('service-name').value = currentUser.name || '';
+            document.getElementById('service-email').value = currentUser.email || '';
+            document.getElementById('service-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeServiceModal() {
+            document.getElementById('service-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function submitServiceBooking(e) {
+            e.preventDefault();
+            var name = document.getElementById('service-name').value.trim();
+            var email = document.getElementById('service-email').value.trim();
+            var phone = document.getElementById('service-phone').value.trim();
+            var service = document.getElementById('service-type').value;
+            var message = document.getElementById('service-message').value.trim();
+            if (!name || !email || !service) { showToast('Please fill in all required fields', 'error'); return; }
+            var booking = { id: Date.now(), name: name, email: email, phone: phone || 'Not provided', service: service,
+                message: message || 'No additional details', date: new Date().toISOString().split('T')[0],
+                status: 'pending' };
+            var bookings = JSON.parse(localStorage.getItem('andu_service_requests') || '[]');
+            bookings.unshift(booking);
+            localStorage.setItem('andu_service_requests', JSON.stringify(bookings));
+            closeServiceModal();
+            showToast('✅ Service booking for ' + service + ' sent! We\'ll contact you soon.', 'success');
+            playNotificationSound('service');
+            document.getElementById('service-booking-form').reset();
+            document.getElementById('service-type').value = '';
+        }
+
+        // ============================================
+        // PRODUCT DATA
+        // ============================================
+        function getDefaultProducts() {
+            return [
+                { id: 1, name: 'IP Camera', price: '17,000 Br', image: 'fa-camera', image_url: '',
+                    stock: 'In Stock', category: 'cctv', rating: 0, reviews: 0,
+                    description: 'High-quality IP camera with night vision and motion detection.' },
+                { id: 2, name: 'PTZ Camera', price: '43,000 Br', image: 'fa-video', image_url: '',
+                    stock: 'In Stock', category: 'cctv', rating: 0, reviews: 0,
+                    description: 'Professional PTZ camera with 360° rotation and zoom capability.' },
+                { id: 3, name: 'Hikvision NVR 8-Channel', price: '9,850 Br', image: 'fa-server', image_url: '',
+                    stock: 'In Stock', category: 'cctv', rating: 0, reviews: 0,
+                    description: '8-channel NVR with 2TB HDD, H.265+ compression.' },
+                { id: 4, name: 'Fingerprint Time Attendance', price: '12,500 Br', image: 'fa-fingerprint',
+                    image_url: '', stock: 'In Stock', category: 'attendance', rating: 0, reviews: 0,
+                    description: 'Biometric fingerprint time attendance system, 1,000 users capacity.' },
+                { id: 5, name: 'Face Recognition Attendance', price: '18,900 Br', image: 'fa-user-check',
+                    image_url: '', stock: 'In Stock', category: 'attendance', rating: 0, reviews: 0,
+                    description: 'Face recognition time attendance with touchless access, 2,000 users capacity.' },
+                { id: 6, name: 'Video Intercom System Kit', price: '15,200 Br', image: 'fa-door-open',
+                    image_url: '', stock: 'In Stock', category: 'intercom', rating: 0, reviews: 0,
+                    description: 'Complete video intercom system with 7-inch monitor, door camera, 2-way audio.' },
+                { id: 7, name: 'Wireless Video Intercom', price: '22,000 Br', image: 'fa-wifi', image_url: '',
+                    stock: 'Low Stock', category: 'intercom', rating: 0, reviews: 0,
+                    description: 'Wireless video intercom with smartphone integration, night vision, motion detection.' },
+                { id: 8, name: 'Enterprise Network Switch', price: '7,800 Br', image: 'fa-server', image_url: '',
+                    stock: 'In Stock', category: 'network', rating: 0, reviews: 0,
+                    description: '24-port Gigabit network switch with PoE+, managed, rack-mountable.' },
+                { id: 9, name: 'WiFi 6 Access Point', price: '5,200 Br', image: 'fa-wifi', image_url: '',
+                    stock: 'In Stock', category: 'network', rating: 0, reviews: 0,
+                    description: 'High-performance WiFi 6 access point, dual-band, 3000 Mbps.' }
+            ];
+        }
+
+        var STORAGE_KEY = 'andu_products';
+        var WISHLIST_KEY = 'andu_wishlist';
+        var REVIEWS_KEY = 'andu_reviews';
+        var ORDERS_KEY = 'andu_orders';
+
+        function loadProducts() {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try {
+                    var data = JSON.parse(raw);
+                    for (var i = 0; i < data.length; i++) {
+                        var p = data[i];
+                        if (!p.category) p.category = 'cctv';
+                        if (!p.stock) p.stock = 'In Stock';
+                        if (!p.rating) p.rating = 0;
+                        if (!p.reviews) p.reviews = 0;
+                        if (!p.image) p.image = 'fa-camera';
+                        if (!p.image_url) p.image_url = '';
+                    }
+                    return data;
+                } catch (e) { console.error('Error loading products:', e); }
+            }
+            var defaults = getDefaultProducts();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+            return defaults;
+        }
+
+        var products = loadProducts();
+        var cart = [];
+        var currentFilter = 'all';
+        var selectedPayment = null;
+        var wishlist = JSON.parse(localStorage.getItem(WISHLIST_KEY) || '[]');
+        var reviews = JSON.parse(localStorage.getItem(REVIEWS_KEY) || '{}');
+        var orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+
+        function parsePrice(priceStr) {
+            var clean = priceStr.replace(/[$,Br\s]/g, '').replace(/,/g, '').trim();
+            return parseFloat(clean) || 0;
+        }
+
+        // ============================================
+        // CART
+        // ============================================
+        function loadCart() {
+            var saved = localStorage.getItem('andu_cart');
+            if (saved) { try { cart = JSON.parse(saved); } catch (e) {} }
+            updateCartUI();
+        }
+
+        function saveCart() {
+            localStorage.setItem('andu_cart', JSON.stringify(cart));
+        }
+
+        function addToCart(id) {
+            var p = null;
+            for (var i = 0; i < products.length; i++) { if (products[i].id === id) { p = products[i]; break; } }
+            if (!p) return;
+            var existing = null;
+            for (var i = 0; i < cart.length; i++) { if (cart[i].id === id) { existing = cart[i]; break; } }
+            if (existing) { existing.quantity = (existing.quantity || 1) + 1; } else { cart.push({ id: p.id, name: p.name,
+                    price: p.price, image: p.image, image_url: p.image_url || '', quantity: 1 }); }
+            saveCart();
+            updateCartUI();
+            showToast(p.name + ' added to cart!', 'success');
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(function(item) { return item.id !== id; });
+            saveCart();
+            renderCartItems();
+            updateCartUI();
+            showToast('Item removed from cart', 'warning');
+        }
+
+        function updateCartUI() {
+            var count = 0;
+            for (var i = 0; i < cart.length; i++) { count += cart[i].quantity || 1; }
+            document.getElementById('nav-cart-count').textContent = count;
+        }
+
+        function toggleCart() {
+            var panel = document.getElementById('cart-panel');
+            if (panel.style.display === 'flex') { panel.style.display = 'none';
+                document.body.style.overflow = ''; } else { panel.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                renderCartItems(); }
+        }
+
+        function renderCartItems() {
+            var container = document.getElementById('cart-items');
+            var empty = document.getElementById('cart-empty');
+            var details = document.getElementById('cart-details');
+            if (cart.length === 0) { container.innerHTML = '';
+                empty.style.display = 'block';
+                details.classList.add('hidden'); return; }
+            empty.style.display = 'none';
+            details.classList.remove('hidden');
+            var html = '';
+            for (var i = 0; i < cart.length; i++) {
+                var item = cart[i];
+                var hasImage = item.image_url && item.image_url.startsWith('data:image');
+                var imageHtml = hasImage ?
+                    '<img src="' + item.image_url + '" alt="' + item.name + '" class="w-full h-full object-cover">' :
+                    '<i class="fas ' + (item.image || 'fa-camera') + ' text-2xl text-blue-400/60"></i>';
+                html += `
+                        <div class="flex items-center gap-4 glass-card p-3 rounded-xl">
+                            <div class="bg-white/5 rounded-xl w-14 h-14 flex items-center justify-center flex-shrink-0 overflow-hidden">${imageHtml}</div>
+                            <div class="flex-1 min-w-0"><h4 class="font-semibold text-sm truncate">${item.name}</h4><div class="text-orange-400 font-bold text-sm">${item.price}</div></div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="updateCartQuantity(${item.id}, -1)" class="bg-white/5 hover:bg-white/15 w-7 h-7 rounded-full text-sm transition">-</button>
+                                <span class="text-sm font-semibold w-5 text-center">${item.quantity || 1}</span>
+                                <button onclick="updateCartQuantity(${item.id}, 1)" class="bg-white/5 hover:bg-white/15 w-7 h-7 rounded-full text-sm transition">+</button>
+                            </div>
+                            <button onclick="removeFromCart(${item.id})" class="text-red-400 hover:text-red-300 transition"><i class="fas fa-trash"></i></button>
+                        </div>`;
+            }
+            container.innerHTML = html;
+            var subtotal = 0;
+            for (var i = 0; i < cart.length; i++) { subtotal += parsePrice(cart[i].price) * (cart[i].quantity || 1); }
+            var tax = subtotal * 0.15;
+            var total = subtotal + tax;
+            document.getElementById('cart-subtotal').textContent = subtotal.toFixed(2) + ' Br';
+            document.getElementById('cart-tax').textContent = tax.toFixed(2) + ' Br';
+            document.getElementById('cart-total-amount').textContent = total.toFixed(2) + ' Br';
+        }
+
+        function updateCartQuantity(id, change) {
+            var item = null;
+            for (var i = 0; i < cart.length; i++) { if (cart[i].id === id) { item = cart[i]; break; } }
+            if (item) {
+                var newQty = (item.quantity || 1) + change;
+                if (newQty <= 0) { removeFromCart(id); } else { item.quantity = newQty;
+                    saveCart();
+                    renderCartItems();
+                    updateCartUI(); }
+            }
+        }
+
+        // ============================================
+        // WISHLIST
+        // ============================================
+        function toggleWishlist(id) {
+            var idx = -1;
+            for (var i = 0; i < wishlist.length; i++) { if (wishlist[i] === id) { idx = i; break; } }
+            if (idx > -1) { wishlist.splice(idx, 1);
+                showToast('Removed from wishlist', 'warning'); } else { wishlist.push(id);
+                showToast('Added to wishlist! ❤️', 'success'); }
+            localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
+            updateWishlistUI();
+            renderProducts();
+        }
+
+        function updateWishlistUI() {
+            var el = document.getElementById('wishlist-count');
+            if (el) {
+                el.textContent = wishlist.length;
+            }
+        }
+
+        // ============================================
+        // RENDER PRODUCTS
+        // ============================================
+        function renderProducts() {
+            var grid = document.getElementById('product-grid');
+            if (!grid) return;
+            var filtered = [];
+            if (currentFilter === 'all') { filtered = products.slice(); } else {
+                for (var i = 0; i < products.length; i++) { if (products[i].category === currentFilter) filtered.push(
+                    products[i]); }
+            }
+            if (filtered.length === 0) {
+                grid.innerHTML =
+                    '<div class="col-span-full text-center py-12 text-gray-400"><i class="fas fa-box-open text-6xl mb-4 opacity-30"></i><p>No products found</p></div>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < filtered.length; i++) {
+                var p = filtered[i];
+                var inWishlist = false;
+                for (var j = 0; j < wishlist.length; j++) { if (wishlist[j] === p.id) { inWishlist = true; break; } }
+                var stockClass = p.stock === 'In Stock' ? 'stock-in' : p.stock === 'Low Stock' ? 'stock-low' : 'stock-in';
+                var rating = p.rating || 0;
+                var reviews = p.reviews || 0;
+                var hasImage = p.image_url && p.image_url.startsWith('data:image');
+                var imageHtml = hasImage ?
+                    '<img src="' + p.image_url + '" alt="' + p.name + '" class="w-full h-full object-cover">' :
+                    '<i class="fas ' + (p.image || 'fa-camera') + ' text-5xl text-blue-400/60"></i>';
+                var categoryLabels = { 'cctv': 'CCTV', 'attendance': 'Time Attendance', 'intercom': 'Video Intercom',
+                    'network': 'Network' };
+                var categoryDisplay = categoryLabels[p.category] || p.category;
+                // Generate star rating
+                var starsHtml = '';
+                var fullStars = Math.floor(rating);
+                var hasHalfStar = rating % 1 >= 0.5;
+                for (var s = 0; s < 5; s++) {
+                    if (s < fullStars) { starsHtml += '★'; } else if (s === fullStars && hasHalfStar) { starsHtml += '★'; } else {
+                        starsHtml += '☆'; }
+                }
+                html += `
+                        <div class="glass-card rounded-2xl p-4 product-card">
+                            <div class="product-image-container mb-3 relative">
+                                ${imageHtml}
+                                <span class="absolute top-2 right-2 stock-badge ${stockClass}">${p.stock}</span>
+                                <button onclick="event.stopPropagation(); toggleWishlist(${p.id})" class="absolute top-2 left-2 btn-wishlist ${inWishlist ? 'active' : ''}" title="Wishlist">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button onclick="event.stopPropagation(); openProductModal(${p.id})" class="absolute bottom-2 left-2 bg-black/50 px-3 py-1 rounded-full text-xs hover:bg-black/70 transition">
+                                    <i class="fas fa-eye mr-1"></i> Quick View
+                                </button>
+                            </div>
+                            <h4 class="font-semibold text-base truncate">${p.name}</h4>
+                            <div class="flex items-center gap-1 text-xs mt-1">
+                                <span class="rating-stars">${starsHtml}</span>
+                                <span class="text-gray-400">(${reviews})</span>
+                            </div>
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="text-xl font-bold text-orange-400">${p.price}</span>
+                                <span class="text-xs text-gray-400 capitalize">${categoryDisplay}</span>
+                            </div>
+                            <div class="flex gap-2 mt-3">
+                                <button class="btn-add-cart" onclick="addToCart(${p.id})">
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
+                                <button class="btn-place-order" onclick="openQuickOrder(${p.id})">
+                                    <i class="fas fa-bolt"></i> Place Order
+                                </button>
+                            </div>
+                        </div>`;
+            }
+            grid.innerHTML = html;
+            updateWishlistUI();
+        }
+
+        // ============================================
+        // PRODUCT MODAL
+        // ============================================
+        function openProductModal(id) {
+            var p = null;
+            for (var i = 0; i < products.length; i++) { if (products[i].id === id) { p = products[i]; break; } }
+            if (!p) return;
+            var modal = document.getElementById('product-modal');
+            var body = document.getElementById('product-modal-body');
+            var rating = p.rating || 0;
+            var reviews = p.reviews || 0;
+            var hasImage = p.image_url && p.image_url.startsWith('data:image');
+            var imageHtml = hasImage ?
+                '<img src="' + p.image_url + '" alt="' + p.name + '" class="w-full h-full object-cover">' :
+                '<i class="fas ' + (p.image || 'fa-camera') + ' text-7xl text-blue-400/70"></i>';
+            // Generate star rating
+            var starsHtml = '';
+            var fullStars = Math.floor(rating);
+            var hasHalfStar = rating % 1 >= 0.5;
+            for (var s = 0; s < 5; s++) {
+                if (s < fullStars) { starsHtml += '★'; } else if (s === fullStars && hasHalfStar) { starsHtml += '★'; } else {
+                    starsHtml += '☆'; }
+            }
+            body.innerHTML = `
+                    <div class="bg-white/5 rounded-2xl h-64 flex items-center justify-center overflow-hidden">${imageHtml}</div>
+                    <div>
+                        <div class="flex items-start justify-between"><h2 class="text-2xl font-bold">${p.name}</h2><span class="stock-badge ${p.stock === 'In Stock' ? 'stock-in' : p.stock === 'Low Stock' ? 'stock-low' : 'stock-in'}">${p.stock}</span></div>
+                        <div class="flex items-center gap-2 mt-1"><span class="rating-stars text-lg">${starsHtml}</span><span class="text-sm text-gray-400">${reviews} reviews</span></div>
+                        <div class="text-3xl font-bold text-orange-400 mt-2">${p.price}</div>
+                        <div class="text-sm text-gray-400 mt-1">Category: ${p.category}</div>
+                        <p class="text-gray-300 mt-3 text-sm leading-relaxed">${p.description}</p>
+                        <div class="flex gap-2 mt-4">
+                            <button onclick="addToCart(${p.id}); closeProductModal();" class="btn-add-cart" style="flex: none; padding: 0.6rem 1.5rem; font-size: 0.9rem;">
+                                <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                            </button>
+                            <button onclick="openQuickOrder(${p.id}); closeProductModal();" class="btn-place-order" style="flex: none; padding: 0.6rem 1.5rem; font-size: 0.9rem;">
+                                <i class="fas fa-bolt mr-2"></i> Place Order
+                            </button>
+                        </div>
+                    </div>`;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ============================================
+        // QUICK ORDER
+        // ============================================
+        function openQuickOrder(id) {
+            var p = null;
+            for (var i = 0; i < products.length; i++) { if (products[i].id === id) { p = products[i]; break; } }
+            if (!p) return;
+
+            if (!currentUser) {
+                showToast('Please login to place an order', 'warning');
+                openAuthModal();
+                return;
+            }
+
+            document.getElementById('quick-product-id').value = p.id;
+            document.getElementById('quick-order-name').textContent = p.name;
+            document.getElementById('quick-order-price').textContent = p.price;
+            
+            var imageContainer = document.getElementById('quick-order-image');
+            if (p.image_url && p.image_url.startsWith('data:image')) {
+                imageContainer.innerHTML = '<img src="' + p.image_url + '" alt="' + p.name + '" class="w-full h-full object-cover">';
+            } else {
+                imageContainer.innerHTML = '<i class="fas ' + (p.image || 'fa-camera') + ' text-3xl text-blue-400/60"></i>';
+            }
+
+            document.getElementById('quick-name').value = currentUser.name || '';
+            document.getElementById('quick-email').value = currentUser.email || '';
+            document.getElementById('quick-phone').value = currentUser.phone || '';
+            document.getElementById('quick-quantity').value = 1;
+
+            document.getElementById('quick-order-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeQuickOrder() {
+            document.getElementById('quick-order-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function submitQuickOrder(e) {
+            e.preventDefault();
+            
+            var id = parseInt(document.getElementById('quick-product-id').value);
+            var name = document.getElementById('quick-name').value.trim();
+            var email = document.getElementById('quick-email').value.trim();
+            var phone = document.getElementById('quick-phone').value.trim();
+            var address = document.getElementById('quick-address').value.trim();
+            var quantity = parseInt(document.getElementById('quick-quantity').value) || 1;
+            var payment = document.getElementById('quick-payment').value;
+
+            if (!name || !email || !phone || !address) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            var p = null;
+            for (var i = 0; i < products.length; i++) { if (products[i].id === id) { p = products[i]; break; } }
+            if (!p) {
+                showToast('Product not found', 'error');
+                return;
+            }
+
+            var priceValue = parsePrice(p.price);
+            var totalPrice = priceValue * quantity;
+            var tax = totalPrice * 0.15;
+            var finalTotal = totalPrice + tax;
+
+            var tracking = 'ORD-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+
+            var order = {
+                id: Date.now(),
+                customer: name,
+                email: email,
+                phone: phone,
+                address: address,
+                items: [{ name: p.name, price: p.price, quantity: quantity }],
+                total: finalTotal.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' Br',
+                status: 'pending',
+                payment: payment,
+                date: new Date().toISOString().split('T')[0],
+                tracking: tracking,
+                quickOrder: true
+            };
+
+            orders.unshift(order);
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+
+            closeQuickOrder();
+            showToast('✅ Quick Order Placed! Tracking: ' + tracking, 'success');
+            playNotificationSound('order');
+        }
+
+        // ============================================
+        // FILTER
+        // ============================================
+        function filterProducts(category) {
+            currentFilter = category;
+            var btns = document.querySelectorAll('.filter-btn');
+            for (var i = 0; i < btns.length; i++) {
+                var btn = btns[i];
+                var isActive = btn.textContent.trim().toLowerCase() === category || (category === 'all' && btn.textContent
+                    .trim() === 'All');
+                btn.className = 'filter-btn px-4 py-1.5 rounded-full text-sm transition ' + (isActive ?
+                    'bg-blue-500/20 text-blue-300' : 'bg-white/5 text-gray-400 hover:bg-white/10');
+            }
+            renderProducts();
+        }
+
+        // ============================================
+        // CHECKOUT
+        // ============================================
+        function openCheckout() {
+            if (cart.length === 0) { showToast('Your cart is empty', 'error'); return; }
+            if (!currentUser) { showToast('Please login to checkout', 'warning');
+                openAuthModal(); return; }
+            toggleCart();
+            document.getElementById('checkout-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            selectedPayment = null;
+            document.getElementById('payment-details').classList.add('hidden');
+            var options = document.querySelectorAll('.payment-option');
+            for (var i = 0; i < options.length; i++) {
+                options[i].style.borderColor = 'rgba(255,255,255,0.06)';
+                options[i].querySelector('input[type="radio"]').checked = false;
+            }
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkout-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function selectPayment(method) {
+            selectedPayment = method;
+            var details = document.getElementById('payment-details');
+            details.classList.remove('hidden');
+            var instructions = {
+                'telebirr': '📱 Pay using Telebirr. You will receive a payment request on your phone.',
+                'cbebirr': '🏦 Pay using CBE Birr. Please have your CBE Birr app ready.',
+                'chapa': '💳 Pay using Chapa. You will be redirected to the payment page.',
+                'cod': '💰 Cash on Delivery. Pay when you receive your order.'
+            };
+            details.innerHTML = '<p class="text-sm text-gray-400">' + (instructions[method] || 'Select a payment method') +
+                '</p>';
+            var options = document.querySelectorAll('.payment-option');
+            for (var i = 0; i < options.length; i++) {
+                options[i].style.borderColor = 'rgba(255,255,255,0.06)';
+                options[i].querySelector('input[type="radio"]').checked = false;
+            }
+            var clicked = document.querySelector('.payment-option[data-method="' + method + '"]');
+            if (clicked) { clicked.style.borderColor = '#1a5bff';
+                clicked.querySelector('input[type="radio"]').checked = true; }
+        }
+
+        function placeOrder() {
+            if (!selectedPayment) { showToast('Please select a payment method', 'error'); return; }
+            var name = document.getElementById('checkout-name').value.trim();
+            var email = document.getElementById('checkout-email').value.trim();
+            var phone = document.getElementById('checkout-phone').value.trim();
+            var address = document.getElementById('checkout-address').value.trim();
+            if (!name || !email || !phone || !address) { showToast('Please fill in all shipping details', 'error'); return; }
+            var orderItems = [];
+            for (var i = 0; i < cart.length; i++) { orderItems.push({ name: cart[i].name, price: cart[i].price,
+                    quantity: cart[i].quantity || 1 }); }
+            var total = document.getElementById('cart-total-amount').textContent;
+            var tracking = 'TRK-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+            var order = { id: Date.now(), customer: name, email: email, phone: phone, address: address, items: orderItems,
+                total: total, status: 'pending', payment: selectedPayment, date: new Date().toISOString().split('T')[0],
+                tracking: tracking };
+            orders.unshift(order);
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+            cart = [];
+            saveCart();
+            updateCartUI();
+            closeCheckout();
+            document.getElementById('checkout-form').reset();
+            var radios = document.querySelectorAll('.payment-option input[type="radio"]');
+            for (var i = 0; i < radios.length; i++) { radios[i].checked = false; }
+            document.getElementById('payment-details').classList.add('hidden');
+            showToast('🔔 New Order! Tracking: ' + tracking + ' 🎵', 'success');
+            playNotificationSound('order');
+        }
+
+        // ============================================
+        // CONTACT FORM
+        // ============================================
+        function handleContactForm(e) {
+            e.preventDefault();
+            showToast('✅ Message sent successfully! We\'ll get back to you soon.', 'success');
+            e.target.reset();
+        }
+
+        // ============================================
+        // NEWSLETTER
+        // ============================================
+        function subscribeNewsletter() {
+            var email = document.getElementById('newsletter-email').value.trim();
+            if (!email || !email.includes('@')) { showToast('Please enter a valid email', 'error'); return; }
+            var subscribers = JSON.parse(localStorage.getItem('andu_subscribers') || '[]');
+            for (var i = 0; i < subscribers.length; i++) { if (subscribers[i] === email) { showToast(
+                        'You are already subscribed!', 'warning'); return; } }
+            subscribers.push(email);
+            localStorage.setItem('andu_subscribers', JSON.stringify(subscribers));
+            document.getElementById('newsletter-email').value = '';
+            showToast('✅ Subscribed successfully!', 'success');
+            playNotificationSound('customer');
+        }
+
+        // ============================================
+        // CHAT
+        // ============================================
+        function openChat() {
+            var msg = prompt('💬 AD Security Support\n\nType your message:', '');
+            if (msg && msg.trim()) { showToast('✅ Message sent! We\'ll respond within 24 hours.', 'success');
+                playNotificationSound('service'); }
+        }
+
+        // ============================================
+        // BACK TO TOP
+        // ============================================
+        window.addEventListener('scroll', function() {
+            var backTop = document.getElementById('back-top');
+            if (window.scrollY > 400) { backTop.style.opacity = '1';
+                backTop.style.visibility = 'visible'; } else { backTop.style.opacity = '0';
+                backTop.style.visibility = 'hidden'; }
+        });
+        document.getElementById('back-top')?.addEventListener('click', function() { window.scrollTo({ top: 0,
+                behavior: 'smooth' }); });
+
+        // ============================================
+        // MOBILE MENU
+        // ============================================
+        document.getElementById('menu-btn')?.addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+
+        // ============================================
+        // MODAL CLOSE ON OVERLAY
+        // ============================================
+        var modals = document.querySelectorAll('.modal-overlay');
+        for (var i = 0; i < modals.length; i++) {
+            modals[i].addEventListener('click', function(e) {
+                if (e.target === this) { this.classList.remove('active');
+                    this.style.display = 'none';
+                    document.body.style.overflow = ''; }
+            });
+        }
+        var cartPanel = document.getElementById('cart-panel');
+        cartPanel.addEventListener('click', function(e) {
+            if (e.target === this) { this.style.display = 'none';
+                document.body.style.overflow = ''; }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var activeModals = document.querySelectorAll('.modal-overlay.active');
+                for (var i = 0; i < activeModals.length; i++) { activeModals[i].classList.remove('active');
+                    activeModals[i].style.display = 'none'; }
+                document.body.style.overflow = '';
+            }
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+        loadCart();
+        renderProducts();
+        updateWishlistUI();
+        checkAuth();
+        console.log('🚀 AD Security Store Loaded!');
+        console.log('📦 ' + products.length + ' products available');
+        console.log('👤 Customer accounts enabled!');
+        console.log('📱 Social app icons added');
+        console.log('🔔 Notification sound system enabled!');
+        console.log('📞 Contact: +251 985 959 697 | +251 918 109 779');
+        console.log('💰 Currency: Ethiopian Birr (Br)');
+        console.log('🛠️ Services: CCTV, Network, Time Attendance, Video Intercom, Web & IT, Access Control');
+        console.log('✅ Dark form inputs fixed!');
+        console.log('⚡ Quick Order feature added!');
+        console.log('❌ Compare button removed');
+        console.log('🎨 Improved button graphics');
+    </script>
+</body>
+</html>
