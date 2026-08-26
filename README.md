@@ -75,6 +75,26 @@ Tabs: Dashboard, Products, Orders, Services, Customers, Inventory, Settings. Sta
 
 Never commit the Supabase **service-role** key anywhere — only the anon key is used by the frontend.
 
+## Auth Troubleshooting (login/register failing)
+
+New Supabase projects have **email confirmation ON**, so `register` creates an *unconfirmed* user and login then fails with “Email not confirmed”. Pick **one** of these:
+
+**Option A — quick test mode (disable confirmation):**
+
+1. Supabase dashboard → **Authentication → Sign in / up** → toggle off **Confirm email**
+2. Keep production `Email Templates` the way they are; users can then register and log in immediately.
+
+**Option B — keep confirmation on (recommended for production):**
+
+1. Supabase dashboard → **Authentication → URL Configuration**
+2. Set **Site URL** to your deployed domain, e.g. `https://your-app.vercel.app`
+3. Add **Redirect URLs**: `https://your-app.vercel.app/**` and `http://localhost:5173/**`
+4. Users register → click the emailed link → get redirected back and log in.
+
+If login still fails after disabling confirmation, also check:
+- Your users were *created before* you turned confirmation off — delete them in **Authentication → Users** and register again.
+- Wrong/anonymous env values — the app shows a config notice banner at the top when env vars are missing/placeholder.
+
 ## Verification (run at build time)
 
 - `npm run build` — `tsc --noEmit` + Vite bundle passes

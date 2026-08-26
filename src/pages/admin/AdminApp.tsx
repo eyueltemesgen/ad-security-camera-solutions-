@@ -172,7 +172,7 @@ function AdminLogin() {
   const handle = async (event: React.FormEvent) => {
     event.preventDefault();
     setBusy(true);
-    const error = await signIn(form.email, form.password);
+    const { error } = await signIn(form.email, form.password);
     setBusy(false);
     if (error) showToast(error, 'error');
   };

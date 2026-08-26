@@ -15,6 +15,7 @@ export function AuthModal() {
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -29,11 +30,12 @@ export function AuthModal() {
   const handleLogin = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    setNotice(null);
     setBusy(true);
-    const message = await signIn(loginForm.email, loginForm.password);
+    const { error: authError } = await signIn(loginForm.email, loginForm.password);
     setBusy(false);
-    if (message) {
-      setError(message);
+    if (authError) {
+      setError(authError);
       return;
     }
     showToast('Welcome back!', 'success');
@@ -44,6 +46,7 @@ export function AuthModal() {
   const handleRegister = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    setNotice(null);
     if (registerForm.password.length < 6) {
       setError('Password must be at least 6 characters.');
       return;
@@ -53,15 +56,22 @@ export function AuthModal() {
       return;
     }
     setBusy(true);
-    const message = await signUp({
+    const result = await signUp({
       fullName: registerForm.name,
       email: registerForm.email,
       phone: registerForm.phone,
       password: registerForm.password,
     });
     setBusy(false);
-    if (message) {
-      setError(message);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.needsEmailConfirmation) {
+      setNotice(
+        'Account created! Please check your email and click the confirmation link, then log in.'
+      );
+      setMode('login');
       return;
     }
     showToast('Account created — welcome!', 'success');
@@ -97,10 +107,14 @@ export function AuthModal() {
               {busy ? 'Signing in…' : 'Login'}
             </button>
           </form>
+          {notice && <p className="text-emerald-400 text-sm text-center mt-2">{notice}</p>}
           {error && <p className="text-red-400 text-sm text-center mt-2">{error}</p>}
           <p className="text-center text-sm text-gray-400 mt-4">
             Don't have an account?{' '}
-            <button onClick={() => { setMode('register'); setError(null); }} className="text-blue-400 hover:text-blue-300">
+            <button
+              onClick={() => { setMode('register'); setError(null); setNotice(null); }}
+              className="text-blue-400 hover:text-blue-300"
+            >
               Register
             </button>
           </p>
@@ -155,10 +169,14 @@ export function AuthModal() {
               {busy ? 'Creating account…' : 'Register'}
             </button>
           </form>
+          {notice && <p className="text-emerald-400 text-sm text-center mt-2">{notice}</p>}
           {error && <p className="text-red-400 text-sm text-center mt-2">{error}</p>}
           <p className="text-center text-sm text-gray-400 mt-4">
             Already have an account?{' '}
-            <button onClick={() => { setMode('login'); setError(null); }} className="text-blue-400 hover:text-blue-300">
+            <button
+              onClick={() => { setMode('login'); setError(null); setNotice(null); }}
+              className="text-blue-400 hover:text-blue-300"
+            >
               Login
             </button>
           </p>
