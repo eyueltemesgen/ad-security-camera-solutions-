@@ -1,53 +1,26 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ['class'],
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
-        },
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+        night: '#0b0e14',
+        panel: '#0f131c',
+        deep: '#080b10',
+        card: '#141b28',
+        brand: {
+          300: '#7aa9ff',
+          400: '#3b7bff',
+          500: '#1a5bff',
+          700: '#0a3bb5',
         },
       },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
-      keyframes: {
-        'pulse-ring': {
-          '0%': { transform: 'scale(0.6)', opacity: '1' },
-          '100%': { transform: 'scale(1.8)', opacity: '0' },
-        },
-      },
-      animation: {
-        'pulse-ring': 'pulse-ring 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      boxShadow: {
+        glow: '0 0 30px rgba(26, 91, 255, 0.2)',
+        card: '0 20px 40px -12px rgba(0, 0, 0, 0.6)',
       },
     },
   },

@@ -1,16 +1,18 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
-  },
   server: {
-    host: '0.0.0.0',
     port: 12000,
+    host: true,
+  },
+  preview: {
+    port: 12000,
+    host: true,
+    allowedHosts: [
+      'work-1-gtcokdlmfhaisibx.prod-runtime.all-hands.dev',
+      'work-2-gtcokdlmfhaisibx.prod-runtime.all-hands.dev',
+    ],
   },
 });

@@ -1,110 +1,82 @@
-# AD Security Camera Solutions - Enterprise AI Surveillance & SOC Platform
+# AD Security Camera Solutions
 
-An enterprise-grade AI video surveillance and camera management platform built as a Security Operations Center (SOC) dashboard. Transforms traditional marketplace/delivery application into a high-performance security monitoring system.
+Professional security storefront + admin dashboard for **AD Security Camera Solutions** (Ethiopia): CCTV, access control, time attendance, video intercom, networking & IT solutions.
 
-## Features
+Rebuilt from scratch with **React/Vite + Supabase + Vercel**. Original design references are in `docs/index.html` and `docs/admin.html`.
 
-### 🎥 Camera Management (`/cameras`)
-- Live Camera Grid with stream status indicators (Online, Offline, Motion Detected, AI Alert)
-- Camera Configuration Modal (RTSP/ONVIF URL, IP address, resolution 1080p/4K, site location, zone assignment)
-- Single Camera View (`/cameras/$cameraId`) with PTZ (Pan-Tilt-Zoom) dynamic controls, HLS/WebRTC streaming interface placeholder, stream telemetry, and recording schedule
+## Architecture
 
-### 🚨 AI Event & Incident Center (`/events`)
-- Real-Time Security Event Log
-- Filters for Severity (Critical, Warning, Info) and Event Type (Person Detection, Intrusion, License Plate Recognition, Thermal Alert, Object Left Behind)
-- Event Detail Drawer with snapshot display, AI confidence score %, bounding box overlay mock, and quick response triggers (Acknowledge, Dispatch Guard, False Alarm)
-
-### 🗺️ Live Operations Map (`/soc/map`)
-- Security Operations Facility Map with satellite/floorplan interactive overlay
-- Camera markers with Field of View (FOV) cones and real-time alert ping badges
-- Interactive stream preview modal on camera marker click
-
-### 🔔 Guard & Incident Escalation Dashboard (`/incidents`)
-- Active Incident Tickets with assigned operator/guard tracking
-- Countdown response timers and audit trail logs
-- One-click team dispatch broadcast using Supabase Realtime notifications
-
-### 📊 System Health & Storage Analytics (`/analytics`)
-- Storage metrics panel (Edge vs. Cloud recording retention, total GB used, uptime graphs)
-- Daily AI detection heatmaps and top triggered zone breakdowns
-
-## Tech Stack
-
-- **Frontend**: React 18 + TypeScript + Vite + TanStack Router + Tailwind CSS + shadcn/ui components
-- **Backend**: Supabase (Auth, RLS, Realtime, Edge Functions)
-- **Runtime**: Bun package manager and runtime
-- **Database**: PostgreSQL with Row Level Security (RLS) policies
-
-## Database Schema
-
-### Tables
-
-- `cameras` (id, name, rtsp_url, ip_address, location_zone, status, ptz_supported, resolution, created_at)
-- `camera_events` (id, camera_id, event_type, severity, confidence_score, snapshot_url, timestamp, status)
-- `incidents` (id, event_id, assigned_guard_id, status, escalation_level, notes, created_at)
-- `storage_retention` (id, camera_id, storage_used_gb, retention_days, cloud_sync_status)
-- `broadcasts` (id, title, message, priority, sender_id, target_zone, created_at)
-- `audit_logs` (id, incident_id, actor_id, action, details, created_at)
-
-### RLS Policies (Three Primary Roles)
-
-- **Admin**: Full access to all tables and operations
-- **Guard/Operator**: Read access to cameras/events/incidents, write access to incidents and broadcasts
-- **Client Viewer**: Read-only access to cameras, events, incidents, and analytics
-
-## Getting Started
-
-### Prerequisites
-- Bun runtime (v1.4+)
-- Node.js (v18+)
-
-### Installation
-
-```bash
-# Install dependencies
-bun install
-
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your Supabase credentials
-
-# Run development server
-bun run dev
-
-# Build for production
-bun run build
-
-# Preview production build
-bun run preview
+```
+GitHub  →  Vercel  →  React/Vite SPA  →  Supabase
+                                          ├─ PostgreSQL (+ RLS)
+                                          ├─ Auth
+                                          ├─ Storage
+                                          └─ Realtime
 ```
 
-### Supabase Setup
+## Quick Start
 
-1. Create a Supabase project at https://supabase.com
-2. Run migrations from `supabase/migrations/` directory
-3. Update `.env` with your project URL and anon key
-4. Configure Row Level Security policies as defined in migrations
+```bash
+npm install
+cp .env.example .env   # fill in your Supabase URL + anon key
+npm run dev
+```
 
-## Brand Identity
+Build: `npm run build` • Preview: `npm run preview`
 
-- **Platform Name**: AD Security Camera Solutions
-- **Tagline**: Enterprise AI Surveillance & Incident Response
-- **Location**: Addis Ababa, Ethiopia
-- **Contact**: +251 985 959 697 | +251 918 109 779
+## Supabase Setup
 
-## License
+1. Create a project at [supabase.com](https://supabase.com)
+2. Run the SQL in `supabase/migrations/` via the Supabase CLI or SQL editor:
+   - `20260826000001_initial_schema.sql` — tables, indexes, `place_order` RPC, triggers
+   - `20260826000002_rls_policies.sql` — Row Level Security for every table
+   - `20260826000003_storage.sql` — buckets (`product-images`, `avatars`, `company-assets`) + policies
+   - `20260826000004_seed.sql` — starter categories + site settings
+   - `20260826000005_realtime.sql` — publication for notifications/orders
+3. Create an **admin user** (App has an "ADM" role for admins):
+   - In Supabase Auth: create a user, then run: `update public.profiles set role = 'admin' where email = '<you@email>';`
+4. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env` (see `.env.example`)
+5. Restart the dev server
 
-© 2026 AD Security Camera Solutions. All Rights Reserved.
+## Vercel Deployment
 
-## Legacy Documentation
+- `vercel.json` rewrites every path to `/index.html` (SPA-safe refresh + direct links)
+- Framework preset: **Vite** (build `npm run build`, output `dist`) — autodetected
+- Set `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` in Vercel → Settings → Environment Variables
 
-Original HTML files are preserved in `docs/` directory:
-- `docs/index.html` - Public website
-- `docs/admin.html` - Admin dashboard
+## Database
 
-## Security
+- `profiles` — extends `auth.users`, roles `customer|admin`, auto-created on signup
+- `product_categories` + seeded categories: CCTV, Time Attendance, Video Intercom, Network
+- `products` — stock is the single inventory source of truth
+- `orders`, `order_items` — `order_number` auto-generated (`AD-######`), financials & items
+- `wishlist_items` — authenticated user tied
+- `service_requests` — bookings from the Services form
+- `notifications` — per-user or NULL = admin broadcast
+- `contact_messages` — contact form submissions
+- `site_settings` — business contact info, singleton row
 
-- Row Level Security (RLS) enforced on all Supabase tables
-- AI inference engine with confidence scoring
-- Real-time WebRTC streams with TLS encryption
-- Audit logging for all incident responses
+Checkout is a server-side transaction via the `place_order` RPC (validates, computes 15% VAT + totals, decrements stock atomically, notifies, doesn't trust browser totals).
+
+## Storage
+
+Images upload to Supabase Storage; only URLs live in DB rows (no base64). Buckets: `product-images`, `avatars`, `company-assets`.
+
+## Admin Panel (`/admin`)
+
+Tabs: Dashboard, Products, Orders, Services, Customers, Inventory, Settings. Staff-only through `profiles.role = 'admin'` enforced by RLS — not just UI. Customers trying `/admin` see Access Denied.
+
+## Env Vars
+
+| Name | Purpose |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key (safe for frontend) |
+
+Never commit the Supabase **service-role** key anywhere — only the anon key is used by the frontend.
+
+## Verification (run at build time)
+
+- `npm run build` — `tsc --noEmit` + Vite bundle passes
+- SQL migrations were validated against real Postgres (PGlite) — schema, RLS, RPC totals, triggers all verified
+- Playwright E2E smoke — hero, services/about/contact, cart drawer, auth modal, `/admin` login render (all passing)

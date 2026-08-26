@@ -1,105 +1,164 @@
-export type UserRole = 'admin' | 'operator' | 'client_viewer';
+export type Role = 'customer' | 'admin';
 
-export type CameraStatus = 'online' | 'offline' | 'motion_detected' | 'ai_alert';
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled';
 
-export type EventSeverity = 'critical' | 'warning' | 'info';
+export type PaymentMethod = 'telebirr' | 'cbe_birr' | 'chapa' | 'cash_on_delivery';
 
-export type EventType =
-  | 'person_detection'
-  | 'intrusion'
-  | 'license_plate_recognition'
-  | 'thermal_alert'
-  | 'object_left_behind';
+export type PaymentStatus = 'pending' | 'paid' | 'failed';
 
-export type IncidentStatus = 'open' | 'acknowledged' | 'dispatched' | 'resolved' | 'false_alarm';
+export type ServiceStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled';
 
-export interface Camera {
+export interface Profile {
   id: string;
-  name: string;
-  rtsp_url: string;
-  ip_address: string;
-  location_zone: string;
-  status: CameraStatus;
-  ptz_supported: boolean;
-  resolution: '1080p' | '4K';
-  fov_angle?: number; // degrees
-  fov_direction?: number; // heading 0-360
-  map_x?: number; // percentage coordinates 0-100 on floorplan
-  map_y?: number;
-  created_at: string;
-  updated_at?: string;
-}
-
-export interface BoundingBox {
-  label: string;
-  confidence: number;
-  x: number; // percentage
-  y: number;
-  w: number;
-  h: number;
-}
-
-export interface CameraEvent {
-  id: string;
-  camera_id: string;
-  camera_name?: string;
-  location_zone?: string;
-  event_type: EventType;
-  severity: EventSeverity;
-  confidence_score: number;
-  snapshot_url: string;
-  timestamp: string;
-  status: 'new' | 'acknowledged' | 'dispatched' | 'resolved' | 'false_alarm';
-  metadata?: {
-    bounding_boxes?: BoundingBox[];
-    license_plate?: string;
-    thermal_temp_c?: number;
-    object_type?: string;
-  };
-}
-
-export interface Incident {
-  id: string;
-  event_id: string;
-  event?: CameraEvent;
-  assigned_guard_id: string | null;
-  assigned_guard_name?: string | null;
-  status: IncidentStatus;
-  escalation_level: number; // 1 to 5
-  notes: string;
-  dispatched_at: string | null;
+  full_name: string;
+  email: string;
+  phone: string;
+  avatar_url: string;
+  role: Role;
   created_at: string;
   updated_at: string;
-  timer_seconds_remaining?: number;
 }
 
-export interface StorageRetention {
+export interface Category {
   id: string;
-  camera_id: string;
-  camera_name?: string;
-  storage_used_gb: number;
-  edge_storage_gb: number;
-  retention_days: number;
-  cloud_sync_status: 'synced' | 'syncing' | 'failed' | 'offline';
-  uptime_pct?: number;
-  updated_at?: string;
+  name: string;
+  slug: string;
+  description: string;
+  created_at: string;
 }
 
-export interface BroadcastNotification {
+export interface Product {
   id: string;
+  name: string;
+  slug: string | null;
+  description: string;
+  price: number;
+  stock: number;
+  rating: number;
+  sku: string | null;
+  category_id: string | null;
+  image_url: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  category?: Category | null;
+}
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  order_number: string;
+  user_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  delivery_address: string;
+  subtotal: number;
+  tax: number;
+  total: number;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
+  status: OrderStatus;
+  created_at: string;
+  updated_at: string;
+  items?: OrderItem[];
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string | null;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+  created_at: string;
+}
+
+export interface ServiceRequest {
+  id: string;
+  user_id: string | null;
+  customer_name: string;
+  phone: string;
+  email: string;
+  service: string;
+  preferred_date: string | null;
+  location: string;
+  description: string;
+  status: ServiceStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AppNotification {
+  id: string;
+  user_id: string | null;
   title: string;
   message: string;
-  priority: 'info' | 'warning' | 'critical';
-  sender_id: string;
-  target_zone?: string;
+  type: string;
+  is_read: boolean;
   created_at: string;
 }
 
-export interface AuditLog {
+export interface ContactMessage {
   id: string;
-  incident_id?: string;
-  actor_id: string;
-  action: string;
-  details?: Record<string, unknown>;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  status: 'new' | 'read' | 'archived';
   created_at: string;
 }
+
+export interface SiteSettings {
+  id: boolean;
+  company_name: string;
+  phone: string;
+  secondary_phone: string;
+  email: string;
+  address: string;
+  currency: string;
+  updated_at: string;
+}
+
+export const ORDER_STATUSES: OrderStatus[] = [
+  'pending',
+  'confirmed',
+  'processing',
+  'shipped',
+  'delivered',
+  'cancelled',
+];
+
+export const SERVICE_STATUSES: ServiceStatus[] = [
+  'pending',
+  'confirmed',
+  'in_progress',
+  'completed',
+  'cancelled',
+];
+
+export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
+  { value: 'telebirr', label: 'Telebirr' },
+  { value: 'cbe_birr', label: 'CBE Birr' },
+  { value: 'chapa', label: 'Chapa' },
+  { value: 'cash_on_delivery', label: 'Cash on Delivery' },
+];
+
+export const LOW_STOCK_THRESHOLD = 5;
+export const TAX_RATE = 0.15;
