@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Camera, Menu, ShoppingCart, User, X } from 'lucide-react';
+import { Camera, Menu, Moon, ShoppingCart, Sun, User, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
 import { useStorefront } from '../hooks/useStorefront';
+import { useTheme } from '../hooks/useTheme';
 
 const LINKS = [
   { href: '/#home', label: 'Home' },
@@ -18,6 +19,7 @@ export function Navbar() {
   const { itemCount } = useCart();
   const { user, isAdmin } = useAuth();
   const { openCart, openAuth } = useStorefront();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleAccount = () => {
@@ -57,6 +59,9 @@ export function Navbar() {
           <button onClick={openCart} className="relative" aria-label="Cart">
             <ShoppingCart className="w-5 h-5 text-gray-300 hover:text-white transition" />
             {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
+          </button>
+          <button onClick={toggleTheme} aria-label="Toggle theme" className="text-gray-300 hover:text-white transition">
+            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
           <button onClick={handleAccount} aria-label="Account">
             <User className="w-5 h-5 text-gray-300 hover:text-white transition" />
@@ -98,6 +103,13 @@ export function Navbar() {
             className="text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 text-left flex items-center gap-2"
           >
             <User className="w-4 h-4" /> My Account
+          </button>
+          <button
+            onClick={toggleTheme}
+            className="text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 text-left flex items-center gap-2"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
           </button>
         </div>
       )}

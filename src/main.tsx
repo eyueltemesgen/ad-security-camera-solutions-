@@ -7,12 +7,14 @@ import { CartProvider } from './hooks/useCart';
 import { StorefrontProvider } from './hooks/useStorefront';
 import { ToastProvider } from './hooks/useToast';
 import { WishlistProvider } from './hooks/useWishlist';
+import { ThemeProvider } from './hooks/useTheme';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
         <AuthProvider>
           <WishlistProvider>
             <CartProvider>
@@ -22,7 +24,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             </CartProvider>
           </WishlistProvider>
         </AuthProvider>
-      </ToastProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
