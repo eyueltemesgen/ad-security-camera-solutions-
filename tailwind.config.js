@@ -20,7 +20,7 @@ export default {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        glow: '0 0 30px rgba(26, 91, 255, 0.2)',
+        glow: '0 0 30px rgba(85, 201, 151, 0.35)',
         card: '0 20px 40px -12px rgba(0, 0, 0, 0.6)',
         'card-light': '0 10px 30px -8px rgba(15, 23, 42, 0.08)',
       },
