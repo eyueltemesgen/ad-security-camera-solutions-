@@ -302,6 +302,40 @@ export async function fetchMedia(): Promise<MediaItem[]> {
   return rows<MediaItem>(data, error);
 }
 
+export async function uploadMedia(file: File, altText = ''): Promise<{ record: MediaItem }> {
+  assertSupabase();
+  const ALLOWED = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+  if (!ALLOWED.includes(file.type)) {
+    throw new Error('Only PNG, JPG, WebP or GIF images are allowed.');
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('Image must be smaller than 5MB.');
+  }
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+  const path = `library/${crypto.randomUUID()}.${ext}`;
+  const { data } = supabase.storage.from('media').getPublicUrl(path);
+  const { error: upErr } = await supabase.storage.from('media').upload(path, file, {
+    cacheControl: '3600',
+    upsert: false,
+  });
+  if (upErr) throw new Error(upErr.message);
+  const { error, data: record } = await supabase
+    .from('media')
+    .insert({
+      filename: file.name,
+      file_type: file.type,
+      file_size: file.size,
+      url: data.publicUrl,
+      path,
+      alt_text: altText,
+      usage: 'library',
+    })
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return { record: record as MediaItem };
+}
+
 export async function deleteMedia(id: string, path: string): Promise<void> {
   assertSupabase();
   const { error } = await supabase.from('media').delete().eq('id', id);

@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import {
   Bell,
   Camera,
+  History,
   Home,
+  Inbox,
+  LayoutDashboard,
   LogOut,
   Package,
   Settings,
@@ -26,16 +29,35 @@ import { ServicesTab } from './ServicesTab';
 import { CustomersTab } from './CustomersTab';
 import { InventoryTab } from './InventoryTab';
 import { SettingsTab } from './SettingsTab';
+import { CmsCatalogTab } from './CmsCatalogTab';
+import { MessagesTab } from './MessagesTab';
+import { MediaTab } from './MediaTab';
+import { AuditLogTab } from './AuditLogTab';
 
-type TabId = 'dashboard' | 'products' | 'orders' | 'services' | 'customers' | 'inventory' | 'settings';
+type TabId =
+  | 'dashboard'
+  | 'cms'
+  | 'products'
+  | 'orders'
+  | 'services'
+  | 'customers'
+  | 'inventory'
+  | 'messages'
+  | 'media'
+  | 'audit'
+  | 'settings';
 
 const TABS: { id: TabId; label: string; icon: typeof Home }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
+  { id: 'cms', label: 'Content', icon: LayoutDashboard },
   { id: 'products', label: 'Products', icon: Package },
   { id: 'orders', label: 'Orders', icon: Truck },
   { id: 'services', label: 'Services', icon: Wrench },
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'inventory', label: 'Inventory', icon: Warehouse },
+  { id: 'messages', label: 'Messages', icon: Inbox },
+  { id: 'media', label: 'Media', icon: Camera },
+  { id: 'audit', label: 'Activity', icon: History },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -155,11 +177,15 @@ export function AdminApp() {
 
       <div className="min-h-[60vh]">
         {tab === 'dashboard' && <DashboardTab refreshSignal={refreshSignal} onNavigate={(t: TabId) => setTab(t)} />}
+        {tab === 'cms' && <CmsCatalogTab />}
         {tab === 'products' && <ProductsTab refreshSignal={refreshSignal} />}
         {tab === 'orders' && <OrdersTab refreshSignal={refreshSignal} />}
         {tab === 'services' && <ServicesTab refreshSignal={refreshSignal} />}
         {tab === 'customers' && <CustomersTab refreshSignal={refreshSignal} />}
         {tab === 'inventory' && <InventoryTab refreshSignal={refreshSignal} />}
+        {tab === 'messages' && <MessagesTab />}
+        {tab === 'media' && <MediaTab />}
+        {tab === 'audit' && <AuditLogTab />}
         {tab === 'settings' && <SettingsTab />}
       </div>
     </div>
