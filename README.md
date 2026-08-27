@@ -43,9 +43,13 @@ Build: `npm run build` • Preview: `npm run preview`
 **Alternative — individual migration files** (for Supabase CLI or manual tracking), in order:
 - `20260826000001_initial_schema.sql` — tables, indexes, `place_order` RPC, triggers
 - `20260826000002_rls_policies.sql` — Row Level Security for every table
-- `20260826000003_storage.sql` — buckets (`product-images`, `avatars`, `company-assets`) + policies
+- `20260826000003_storage.sql` — buckets (`product-images`, `company-assets`, `media`) + policies
 - `20260826000004_seed.sql` — starter categories + site settings
 - `20260826000005_realtime.sql` — publication for notifications/orders
+- `20260826000006_mobile_rebuild.sql` — Phase 2 storefront additions (site settings, page tables)
+- `20260827000007_cms.sql` — Phase 3 CMS schema: services, gallery, testimonials, FAQs, nav, social links, footer sections, media, announcements, pages, homepage sections, service categories
+- `20260827000008_cms_rls.sql` — RLS for CMS tables + `avatars` storage bucket (per-user write in `avt/<uid>/`)
+- `20260827000009_cms_seed.sql` — starter CMS seed data
 
 ## Vercel Deployment
 
@@ -64,16 +68,31 @@ Build: `npm run build` • Preview: `npm run preview`
 - `notifications` — per-user or NULL = admin broadcast
 - `contact_messages` — contact form submissions
 - `site_settings` — business contact info, singleton row
+- CMS tables — `services`, `service_categories`, `gallery`, `testimonials`, `faqs`, `navigation`, `social_links`, `footer_sections`, `media`, `announcements`, `pages`, `homepage_sections`, `audit_logs`
 
 Checkout is a server-side transaction via the `place_order` RPC (validates, computes 15% VAT + totals, decrements stock atomically, notifies, doesn't trust browser totals).
 
 ## Storage
 
-Images upload to Supabase Storage; only URLs live in DB rows (no base64). Buckets: `product-images`, `avatars`, `company-assets`.
+Images upload to Supabase Storage; only URLs live in DB rows (no base64). Buckets:
+- `product-images` — product photos (admin-managed)
+- `avatars` — customer profile photos, public read, write only to the owner's folder `avt/<uid>/`
+- `media` — admin CMS media library (public read)
+- `service-files` — customer photo/document uploads for service requests
+- `company-assets` — static brand assets
+
+## Customer Account (`/account`)
+
+Tabs: Orders, Wishlist, Service Requests, **Addresses**, Notifications. The profile card supports **avatar upload** (camera icon on the avatar — PNG/JPG/WebP/GIF, ≤2 MB, stored in the `avatars` bucket under `avt/<uid>/`). The **Addresses** tab lets customers add, edit, delete, and mark a default saved address.
 
 ## Admin Panel (`/admin`)
 
-Tabs: Dashboard, Products, Orders, Services, Customers, Inventory, Settings. Staff-only through `profiles.role = 'admin'` enforced by RLS — not just UI. Customers trying `/admin` see Access Denied.
+Tabs: Dashboard, **Content**, Products, Orders, Services, Customers, Inventory, **Messages**, **Media**, **Activity**, Settings. Staff-only through `profiles.role = 'admin'` enforced by RLS — not just UI. Customers trying `/admin` see Access Denied.
+
+- **Content** — full CMS: CRUD for services, service categories, gallery, testimonials, FAQs, navigation, social links, pages, announcements, and homepage sections (each with search, add/edit/delete, and active toggles)
+- **Messages** — contact-form inbox with new/read/archived states and a reading pane
+- **Media** — media library: browse, upload (PNG/JPG/WebP/GIF, ≤5 MB), copy URL, delete (removes the storage object too)
+- **Activity** — audit trail of admin actions (who did what, when)
 
 ## Env Vars
 
