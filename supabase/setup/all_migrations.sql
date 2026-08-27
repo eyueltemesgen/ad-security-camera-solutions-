@@ -1,4 +1,14 @@
 -- ============================================================================
+-- AD SECURITY CAMERA SOLUTIONS — Consolidated Schema (all migrations)
+-- PostgreSQL / Supabase
+-- Generated from supabase/migrations/*.sql in filename order
+-- ============================================================================
+
+
+-- ============================================================================
+-- SOURCE: supabase/migrations/20260826000001_initial_schema.sql
+-- ============================================================================
+-- ============================================================================
 -- AD SECURITY CAMERA SOLUTIONS — Initial Schema
 -- PostgreSQL / Supabase
 -- Inventory source of truth: products.stock (no separate conflicting table)
@@ -418,6 +428,10 @@ $$;
 
 revoke all on function public.place_order(text, text, text, text, text, jsonb) from public;
 grant execute on function public.place_order(text, text, text, text, text, jsonb) to authenticated;
+
+-- ============================================================================
+-- SOURCE: supabase/migrations/20260826000002_rls_policies.sql
+-- ============================================================================
 -- ============================================================================
 -- AD SECURITY CAMERA SOLUTIONS — Row Level Security
 -- ============================================================================
@@ -658,6 +672,10 @@ create policy "site_settings_update_admin"
 create policy "site_settings_delete_admin"
   on public.site_settings for delete
   using (public.is_admin());
+
+-- ============================================================================
+-- SOURCE: supabase/migrations/20260826000003_storage.sql
+-- ============================================================================
 -- ============================================================================
 -- AD SECURITY CAMERA SOLUTIONS — Supabase Storage buckets & policies
 -- ============================================================================
@@ -740,6 +758,10 @@ create policy "ad_avatar_delete_own_or_admin"
     bucket_id = 'avatars'
     and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin())
   );
+
+-- ============================================================================
+-- SOURCE: supabase/migrations/20260826000004_seed.sql
+-- ============================================================================
 -- ============================================================================
 -- AD SECURITY CAMERA SOLUTIONS — Seed data
 -- Safe initial data only: categories, site settings, optional demo catalog.
@@ -793,6 +815,10 @@ from (values
 ) as p (name, slug, description, price, stock, sku, category_slug)
 join public.product_categories c on c.slug = p.category_slug
 on conflict (sku) do nothing;
+
+-- ============================================================================
+-- SOURCE: supabase/migrations/20260826000005_realtime.sql
+-- ============================================================================
 -- ============================================================================
 -- AD SECURITY CAMERA SOLUTIONS — Supabase Realtime publication
 -- Powers the live admin dashboard (new orders, service requests, notifications)
@@ -817,6 +843,10 @@ begin
   exception when duplicate_object then null;
   end;
 end $$;
+
+-- ============================================================================
+-- SOURCE: supabase/migrations/20260826000006_mobile_rebuild.sql
+-- ============================================================================
 -- Add website URL to site_settings and camera specs to products.
 
 alter table public.site_settings
@@ -849,6 +879,10 @@ values (
   'ETB'
 )
 on conflict (id) do nothing;
+
+-- ============================================================================
+-- SOURCE: supabase/migrations/20260827000007_cms.sql
+-- ============================================================================
 -- ============================================================================
 -- AD SECURITY CAMERA SOLUTIONS — Phase 3: Admin CMS & full feature tables
 -- Adds the website CMS layer + product/order/service enhancements.
@@ -1219,7 +1253,136 @@ create trigger touch_homepage_sections before update on public.homepage_sections
 
 drop trigger if exists touch_announcements on public.announcements;
 create trigger touch_announcements before update on public.announcements
-  for each row execute function public.touch_updated_at();-- ============================================================================
+  for each row execute function public.touch_updated_at();
+
+-- ============================================================================
+-- 19. place_order redefined: accepts city + delivery notes
+-- ============================================================================
+
+create or replace function public.place_order(
+  p_customer_name    text,
+  p_customer_email   text,
+  p_customer_phone   text,
+  p_delivery_address text,
+  p_city             text,
+  p_delivery_notes   text,
+  p_payment_method   text,
+  p_items            jsonb
+)
+returns public.orders
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id    uuid := auth.uid();
+  v_item       jsonb;
+  v_product    public.products%rowtype;
+  v_qty        integer;
+  v_subtotal   numeric(12, 2) := 0;
+  v_tax        numeric(12, 2);
+  v_total      numeric(12, 2);
+  v_order      public.orders%rowtype;
+begin
+  if v_user_id is null then
+    raise exception 'Authentication required to place an order';
+  end if;
+
+  if p_items is null or jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then
+    raise exception 'Cart is empty';
+  end if;
+
+  if p_payment_method not in ('telebirr', 'cbe_birr', 'chapa', 'cash_on_delivery') then
+    raise exception 'Invalid payment method';
+  end if;
+
+  for v_item in
+    select value from jsonb_array_elements(p_items)
+    order by (value ->> 'product_id')
+  loop
+    v_qty := (v_item ->> 'quantity')::integer;
+    if v_qty is null or v_qty < 1 then
+      raise exception 'Invalid quantity';
+    end if;
+
+    select * into v_product
+    from public.products
+    where id = (v_item ->> 'product_id')::uuid
+    for update;
+
+    if not found or not v_product.is_active then
+      raise exception 'Product is no longer available';
+    end if;
+
+    if v_product.stock < v_qty then
+      raise exception 'Insufficient stock for "%" (available: %)', v_product.name, v_product.stock;
+    end if;
+
+    v_subtotal := v_subtotal + v_product.price * v_qty;
+  end loop;
+
+  v_tax   := round(v_subtotal * 0.15, 2);   -- 15% VAT
+  v_total := v_subtotal + v_tax;
+
+  insert into public.orders (
+    user_id, customer_name, customer_email, customer_phone,
+    delivery_address, city, delivery_notes, subtotal, tax, total,
+    payment_method, payment_status, status
+  ) values (
+    v_user_id, p_customer_name, p_customer_email, coalesce(p_customer_phone, ''),
+    coalesce(p_delivery_address, ''), coalesce(p_city, ''), coalesce(p_delivery_notes, ''),
+    v_subtotal, v_tax, v_total,
+    p_payment_method, 'pending', 'pending'
+  )
+  returning * into v_order;
+
+  for v_item in
+    select value from jsonb_array_elements(p_items)
+    order by (value ->> 'product_id')
+  loop
+    v_qty := (v_item ->> 'quantity')::integer;
+
+    select * into v_product
+    from public.products
+    where id = (v_item ->> 'product_id')::uuid;
+
+    insert into public.order_items (
+      order_id, product_id, product_name, quantity, unit_price, subtotal
+    ) values (
+      v_order.id, v_product.id, v_product.name, v_qty, v_product.price, v_product.price * v_qty
+    );
+
+    update public.products
+    set stock = stock - v_qty
+    where id = v_product.id;
+  end loop;
+
+  insert into public.notifications (user_id, title, message, type)
+  values (
+    null,
+    'New order ' || v_order.order_number,
+    p_customer_name || ' placed an order worth ' || to_char(v_total, 'FM999,999,990.00') || ' ETB',
+    'new_order'
+  );
+
+  insert into public.notifications (user_id, title, message, type)
+  values (
+    v_user_id,
+    'Order placed',
+    'Your order ' || v_order.order_number || ' was received and is pending confirmation.',
+    'order_placed'
+  );
+
+  return v_order;
+end;
+$$;
+
+revoke all on function public.place_order(text, text, text, text, text, text, text, jsonb) from public;
+grant execute on function public.place_order(text, text, text, text, text, text, text, jsonb) to authenticated;
+-- ============================================================================
+-- SOURCE: supabase/migrations/20260827000008_cms_rls.sql
+-- ============================================================================
+-- ============================================================================
 -- AD SECURITY CAMERA SOLUTIONS — Phase 3 CMS: Row Level Security
 -- Pattern: public read active/published content, admin full write access.
 -- ============================================================================
@@ -1489,6 +1652,32 @@ create policy "ad_service_files_update"
   using (bucket_id = 'service-files')
   with check (bucket_id = 'service-files');
 
+-- avatars bucket: public read for all, write only to own folder (avt/<uid>/)
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+drop policy if exists "ad_avatars_read" on storage.objects;
+create policy "ad_avatars_read"
+  on storage.objects for select
+  using (bucket_id = 'avatars');
+
+drop policy if exists "ad_avatars_write_own" on storage.objects;
+create policy "ad_avatars_write_own"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "ad_avatars_update_own" on storage.objects;
+create policy "ad_avatars_update_own"
+  on storage.objects for update to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text)
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "ad_avatars_delete_own" on storage.objects;
+create policy "ad_avatars_delete_own"
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
 -- ============================================================================
 -- Realtime publication additions
 -- ============================================================================
@@ -1505,7 +1694,11 @@ begin
   exception when duplicate_object then null; end;
 end $$;
 
-notify pgrst, 'reload schema';-- ============================================================================
+notify pgrst, 'reload schema';
+-- ============================================================================
+-- SOURCE: supabase/migrations/20260827000009_cms_seed.sql
+-- ============================================================================
+-- ============================================================================
 -- AD SECURITY CAMERA SOLUTIONS — Phase 3 CMS seed data
 -- All of this is editable/deletable by the Admin from the CMS.
 -- ============================================================================

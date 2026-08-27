@@ -5,7 +5,9 @@ import {
   Camera,
   Heart,
   LogOut,
+  MapPin,
   Package,
+  Save,
   ShoppingCart,
   User,
   Wrench,
@@ -15,6 +17,13 @@ import { useCart } from '../hooks/useCart';
 import { useQuery } from '../hooks/useQuery';
 import { useToast } from '../hooks/useToast';
 import { useWishlist } from '../hooks/useWishlist';
+import {
+  createAddress,
+  deleteAddress,
+  fetchAddresses,
+  updateAddress,
+  uploadAvatar,
+} from '../services/account';
 import { fetchMyOrders } from '../services/orders';
 import {
   fetchMyServiceRequests,
@@ -24,16 +33,17 @@ import {
 } from '../services/misc';
 import { fetchWishlistProducts } from '../services/wishlist';
 import { formatDate, formatDateTime, formatETB, paymentMethodLabel } from '../lib/utils';
-import type { Order } from '../types';
+import type { Address, Order } from '../types';
 import { EmptyState, ErrorBox, Spinner } from '../components/ui';
 import { OrderDetailModal, StatusBadge } from '../components/modals/OrderDetailModal';
 
-type Tab = 'orders' | 'wishlist' | 'services' | 'notifications';
+type Tab = 'orders' | 'wishlist' | 'services' | 'notifications' | 'addresses';
 
 const TABS: { id: Tab; label: string; icon: typeof Package }[] = [
   { id: 'orders', label: 'Orders', icon: Package },
   { id: 'wishlist', label: 'Wishlist', icon: Heart },
   { id: 'services', label: 'Service Requests', icon: Wrench },
+  { id: 'addresses', label: 'Addresses', icon: MapPin },
   { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
 
@@ -60,6 +70,10 @@ export function AccountPage() {
   );
   const notifications = useQuery(
     () => (user ? fetchNotifications({ userId: user.id, admin: false }) : Promise.resolve([])),
+    [user?.id, tab]
+  );
+  const addresses = useQuery(
+    () => (user ? fetchAddresses(user.id) : Promise.resolve([])),
     [user?.id, tab]
   );
 
@@ -98,8 +112,36 @@ export function AccountPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Profile card */}
         <div className="glass-card p-6 rounded-2xl h-fit">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500/30 to-brand-700/30 border-2 border-brand-500/40 flex items-center justify-center mx-auto mb-3">
-            <User className="w-8 h-8 text-brand-300" />
+          <div className="relative mx-auto mb-3 w-20 h-20">
+            <div className="w-full h-full rounded-full bg-gradient-to-br from-brand-500/30 to-brand-700/30 border-2 border-brand-500/40 flex items-center justify-center overflow-hidden">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-9 h-9 text-brand-300" />
+              )}
+            </div>
+            <label className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-brand-600 hover:bg-brand-500 cursor-pointer border-2 border-white/20 flex items-center justify-center">
+              <Camera className="w-3.5 h-3.5 text-white" />
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    const url = await uploadAvatar(user.id, file);
+                    const error = await updateProfile({ avatar_url: url });
+                    if (error) showToast(error, 'error');
+                    else showToast('Photo updated', 'success');
+                  } catch (err) {
+                    showToast(err instanceof Error ? err.message : 'Upload failed', 'error');
+                  } finally {
+                    e.target.value = '';
+                  }
+                }}
+              />
+            </label>
           </div>
           <h2 className="text-xl font-bold text-center">{profile?.full_name || user.email}</h2>
           <p className="text-sm text-gray-400 text-center">{user.email}</p>
@@ -342,10 +384,142 @@ export function AccountPage() {
               </div>
             )
           )}
+
+          {tab === 'addresses' && (
+            addresses.loading ? (
+              <Spinner />
+            ) : addresses.error ? (
+              <ErrorBox message={addresses.error} onRetry={() => void addresses.refetch()} />
+            ) : (
+              <AddressBook
+                user={user}
+                items={addresses.data ?? []}
+                onChanged={() => void addresses.refetch()}
+              />
+            )
+          )}
         </div>
       </div>
 
       <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+    </div>
+  );
+}
+
+function AddressBook({
+  user,
+  items,
+  onChanged,
+}: {
+  user: { id: string };
+  items: Address[];
+  onChanged: () => void;
+}) {
+  const { showToast } = useToast();
+  const blank = { label: '', full_name: '', phone: '', address: '', city: '', notes: '', is_default: false };
+  const [editing, setEditing] = useState<Address | 'new' | null>(null);
+  const [form, setForm] = useState<{ label: string; full_name: string; phone: string; address: string; city: string; notes: string; is_default: boolean }>(blank);
+  const [busy, setBusy] = useState(false);
+
+  const startNew = () => {
+    setForm(blank);
+    setEditing('new');
+  };
+  const startEdit = (a: Address) => {
+    setForm({ label: a.label, full_name: a.full_name, phone: a.phone, address: a.address, city: a.city, notes: a.notes, is_default: a.is_default });
+    setEditing(a);
+  };
+
+  const save = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!editing) return;
+    setBusy(true);
+    try {
+      if (editing === 'new') {
+        await createAddress(user.id, form);
+        showToast('Address added', 'success');
+      } else {
+        await updateAddress(user.id, editing.id, form);
+        showToast('Address updated', 'success');
+      }
+      setEditing(null);
+      onChanged();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to save address', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold">Saved Addresses</h3>
+        <button onClick={startNew} className="btn-primary text-xs py-2 px-3 flex items-center gap-1.5">
+          <Save className="w-3.5 h-3.5" /> Add Address
+        </button>
+      </div>
+
+      {items.length === 0 && !editing ? (
+        <EmptyState message="No saved addresses." icon={<MapPin className="w-14 h-14 opacity-30" />} />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          {items.map((a) => (
+            <div key={a.id} className="glass-card rounded-xl p-4">
+              <div className="flex items-center justify-between mb-1">
+                <p className="font-semibold text-sm">{a.label || 'Address'}</p>
+                <div className="flex gap-2 items-center">
+                  {a.is_default && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 font-medium">
+                      Default
+                    </span>
+                  )}
+                  <button onClick={() => startEdit(a)} className="text-[11px] text-brand-400 hover:underline">Edit</button>
+                  <button
+                    onClick={() => {
+                      void deleteAddress(user.id, a.id).then(() => {
+                        showToast('Address removed', 'info');
+                        onChanged();
+                      });
+                    }}
+                    className="text-[11px] text-red-400 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+              {a.full_name && <p className="text-sm text-gray-300">{a.full_name}</p>}
+              {a.phone && <p className="text-xs text-gray-400">{a.phone}</p>}
+              <p className="text-sm text-gray-400 mt-1">{a.address}, {a.city}</p>
+              {a.notes && <p className="text-xs text-gray-500 mt-1">{a.notes}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {editing && (
+        <form onSubmit={save} className="glass-card rounded-xl p-5 space-y-3">
+          <h4 className="font-bold">{editing === 'new' ? 'New Address' : 'Edit Address'}</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input className="form-input" placeholder="Label (e.g. Home, Office)" required value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} />
+            <input className="form-input" placeholder="Full Name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+            <input className="form-input" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <input className="form-input" placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+          </div>
+          <textarea className="form-input" rows={2} placeholder="Address (street, area)" required value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <input className="form-input" placeholder="Notes (optional)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          <label className="flex items-center gap-2 text-sm text-gray-300">
+            <input type="checkbox" checked={form.is_default} onChange={(e) => setForm({ ...form, is_default: e.target.checked })} />
+            Set as default address
+          </label>
+          <div className="flex gap-2">
+            <button type="submit" disabled={busy} className="btn-primary text-sm py-2 px-4 flex items-center gap-1.5">
+              <Save className="w-3.5 h-3.5" /> {busy ? 'Saving…' : 'Save'}
+            </button>
+            <button type="button" onClick={() => setEditing(null)} className="btn-outline text-sm py-2 px-4">Cancel</button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }
