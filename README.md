@@ -48,7 +48,7 @@ Build: `npm run build` • Preview: `npm run preview`
 - `20260826000005_realtime.sql` — publication for notifications/orders
 - `20260826000006_mobile_rebuild.sql` — Phase 2 storefront additions (site settings, page tables)
 - `20260827000007_cms.sql` — Phase 3 CMS schema: services, gallery, testimonials, FAQs, nav, social links, footer sections, media, announcements, pages, homepage sections, service categories
-- `20260827000008_cms_rls.sql` — RLS for CMS tables + `avatars` storage bucket (per-user write in `avt/<uid>/`)
+- `20260827000008_cms_rls.sql` — RLS for CMS tables + `avatars` storage bucket (per-user write in `<uid>/`)
 - `20260827000009_cms_seed.sql` — starter CMS seed data
 
 ## Vercel Deployment
@@ -76,14 +76,14 @@ Checkout is a server-side transaction via the `place_order` RPC (validates, comp
 
 Images upload to Supabase Storage; only URLs live in DB rows (no base64). Buckets:
 - `product-images` — product photos (admin-managed)
-- `avatars` — customer profile photos, public read, write only to the owner's folder `avt/<uid>/`
+- `avatars` — customer profile photos, public read, write only to the owner's folder `<uid>/`
 - `media` — admin CMS media library (public read)
 - `service-files` — customer photo/document uploads for service requests
 - `company-assets` — static brand assets
 
 ## Customer Account (`/account`)
 
-Tabs: Orders, Wishlist, Service Requests, **Addresses**, Notifications. The profile card supports **avatar upload** (camera icon on the avatar — PNG/JPG/WebP/GIF, ≤2 MB, stored in the `avatars` bucket under `avt/<uid>/`). The **Addresses** tab lets customers add, edit, delete, and mark a default saved address.
+Tabs: Orders, Wishlist, Service Requests, **Addresses**, Notifications. The profile card supports **avatar upload** (camera icon on the avatar — PNG/JPG/WebP/GIF, ≤2 MB, stored in the `avatars` bucket under `<uid>/`). The **Addresses** tab lets customers add, edit, delete, and mark a default saved address.
 
 ## Admin Panel (`/admin`)
 

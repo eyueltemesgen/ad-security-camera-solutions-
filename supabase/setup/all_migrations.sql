@@ -1652,7 +1652,7 @@ create policy "ad_service_files_update"
   using (bucket_id = 'service-files')
   with check (bucket_id = 'service-files');
 
--- avatars bucket: public read for all, write only to own folder (avt/<uid>/)
+-- avatars bucket: public read for all, write only to own folder (<uid>/)
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
 on conflict (id) do nothing;
