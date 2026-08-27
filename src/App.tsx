@@ -2,11 +2,12 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { DatabaseZap } from 'lucide-react';
 import { isSupabaseConfigured } from './lib/supabase';
-import { Navbar } from './components/Navbar';
+import { Header } from './components/Header';
 import { HomePage } from './pages/HomePage';
 import { AccountPage } from './pages/AccountPage';
 
-// Admin (recharts + management UI) is code-split to keep the storefront light
+// Admin (recharts + management UI) is code-split to keep the storefront light.
+// It is intentionally NOT linked from any storefront navigation — /admin only.
 const AdminApp = lazy(() => import('./pages/admin/AdminApp').then((m) => ({ default: m.AdminApp })));
 
 export function App() {
@@ -14,22 +15,35 @@ export function App() {
     return <SetupNotice />;
   }
   return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/account" element={<AccountPage />} />
-        <Route
-          path="/admin"
-          element={
-            <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center text-gray-600 dark:text-gray-400">Loading admin…</div>}>
-              <AdminApp />
-            </Suspense>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </>
+    <Routes>
+      <Route
+        path="/admin"
+        element={
+          <Suspense
+            fallback={
+              <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-page)' }}>
+                <p style={{ color: 'var(--text-muted)' }}>Loading admin…</p>
+              </div>
+            }
+          >
+            <AdminApp />
+          </Suspense>
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <>
+            <Header />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/account" element={<AccountPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </>
+        }
+      />
+    </Routes>
   );
 }
 
@@ -54,19 +68,12 @@ function SetupNotice() {
         <DatabaseZap className="w-12 h-12 text-amber-600 dark:text-amber-400 mx-auto mb-4" />
         <h2 className="text-xl font-bold mb-3">Supabase setup required</h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          This app needs a Supabase project. Set the environment variables and restart the dev
-          server:
+          This app needs a Supabase project. Set the environment variables and restart the dev server:
         </p>
         <ol className="text-left text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
           <li>1. Create a project at <span className="text-brand-500 dark:text-blue-400">supabase.com</span></li>
-          <li>
-            2. Run the SQL in <code className="text-brand-300 dark:text-blue-300">supabase/migrations/</code> (or use
-            the Supabase CLI)
-          </li>
-          <li>
-            3. Copy <code className="text-brand-300 dark:text-blue-300">.env.example</code> to{' '}
-            <code className="text-brand-300 dark:text-blue-300">.env</code> and fill in your Project URL + anon key
-          </li>
+          <li>2. Run the SQL in <code className="text-brand-300 dark:text-blue-300">supabase/migrations/</code> (or use the Supabase CLI)</li>
+          <li>3. Copy <code className="text-brand-300 dark:text-blue-300">.env.example</code> to <code className="text-brand-300 dark:text-blue-300">.env</code> and fill in your Project URL + anon key</li>
           <li>4. Restart the dev server</li>
         </ol>
         <p className="text-xs text-gray-500">

@@ -8,6 +8,7 @@
   }
 
   :root {
+    --brand-accent: #1b4d2e;
     --bg-page: #f5f3eb;
     --bg-panel: #ffffff;
     --bg-deep: #eceade;
@@ -33,6 +34,7 @@
   }
 
   .dark {
+    --brand-accent: #55c997;
     --bg-page: #0b1411;
     --bg-panel: #102019;
     --bg-deep: #08100c;
@@ -597,4 +599,66 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(27, 77, 46, 0.35);
+}
+
+/* ---------- admin dark theme (storefront untouched) ---------- */
+.admin-root {
+  --brand-accent: #55c997;
+  --bg-page: #0b1411;
+  --bg-panel: #102019;
+  --bg-deep: #08100c;
+  --bg-card: #12211a;
+  --bg-input: #0e1c15;
+  --border-soft: rgba(85, 201, 151, 0.18);
+  --border-medium: rgba(85, 201, 151, 0.3);
+  --text-primary: #ffffff;
+  --text-secondary: #8fa099;
+  --text-muted: #6b7f76;
+  --glass-bg: rgba(18, 33, 26, 0.6);
+  --glass-border: rgba(85, 201, 151, 0.15);
+  --glass-card-bg: #12211a;
+  --shadow-card: 0 10px 30px -8px rgba(0, 0, 0, 0.45);
+  --input-bg: rgba(255, 255, 255, 0.04);
+  --input-border: rgba(85, 201, 151, 0.25);
+  --input-text: #ffffff;
+  --input-placeholder: #55665d;
+  --nav-bg: rgba(11, 20, 17, 0.82);
+  --overlay-bg: rgba(4, 10, 8, 0.7);
+  --table-hover: rgba(85, 201, 151, 0.05);
+  --table-border: rgba(85, 201, 151, 0.12);
+
+  background-color: #0b1411;
+  color: #ffffff;
+  min-height: 100vh;
+}
+
+/* Re-declare utility classes within the admin scope so they win over the
+   global :root light-mode remaps (higher specificity = scope class + class). */
+.admin-root .text-gray-300 { color: #8fa099 !important; }
+.admin-root .text-gray-400 { color: #6b7f76 !important; }
+.admin-root .text-gray-500 { color: #6b7f76 !important; }
+.admin-root .text-gray-600 { color: #55665d !important; }
+.admin-root .text-brand-300,
+.admin-root .text-brand-400,
+.admin-root .text-brand-500 { color: #55c997 !important; }
+.admin-root .text-blue-400 { color: #55c997 !important; }
+.admin-root .text-blue-300 { color: #7fd6ae !important; }
+.admin-root .text-emerald-300 { color: #6ee7b7 !important; }
+.admin-root .text-emerald-400 { color: #34d399 !important; }
+.admin-root .text-yellow-400 { color: #fbbf24 !important; }
+.admin-root .text-purple-400 { color: #c084fc !important; }
+.admin-root .text-red-400 { color: #f87171 !important; }
+.admin-root .text-orange-400 { color: #fb923c !important; }
+.admin-root .text-pink-400 { color: #f472b6 !important; }
+.admin-root .bg-white\/5 { background-color: rgba(255, 255, 255, 0.04) !important; }
+.admin-root .bg-white\/10 { background-color: rgba(255, 255, 255, 0.06) !important; }
+.admin-root .hover\:bg-white\/5:hover { background-color: rgba(255, 255, 255, 0.05) !important; }
+.admin-root .border-white\/5 { border-color: rgba(255, 255, 255, 0.06) !important; }
+.admin-root .border-white\/10 { border-color: rgba(255, 255, 255, 0.1) !important; }
+.admin-root .hover\:text-white:hover { color: #ffffff !important; }
+.admin-root select.form-input option { background: #12211a !important; color: #ffffff !important; }
+.admin-root .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #0f2019 !important;
+  border: 1px solid rgba(85, 201, 151, 0.2) !important;
+  color: #ffffff !important;
 }

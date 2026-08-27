@@ -41,6 +41,8 @@ interface FormState {
   description: string;
   imageUrl: string;
   isActive: boolean;
+  resolution: string;
+  nightVisionM: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -54,6 +56,8 @@ const EMPTY_FORM: FormState = {
   description: '',
   imageUrl: '',
   isActive: true,
+  resolution: '',
+  nightVisionM: '',
 };
 
 export function ProductsTab({ refreshSignal }: { refreshSignal: number }) {
@@ -102,6 +106,8 @@ export function ProductsTab({ refreshSignal }: { refreshSignal: number }) {
       description: product.description,
       imageUrl: product.image_url,
       isActive: product.is_active,
+      resolution: product.resolution ?? '',
+      nightVisionM: product.night_vision_m == null ? '' : String(product.night_vision_m),
     });
     setShowForm(true);
   };
@@ -144,6 +150,8 @@ export function ProductsTab({ refreshSignal }: { refreshSignal: number }) {
       category_id: form.categoryId || null,
       image_url: form.imageUrl,
       is_active: form.isActive,
+      resolution: form.resolution.trim(),
+      night_vision_m: form.nightVisionM === '' ? null : Number(form.nightVisionM),
     };
 
     setBusy(true);
@@ -285,6 +293,21 @@ export function ProductsTab({ refreshSignal }: { refreshSignal: number }) {
               className="form-input"
               value={form.sku}
               onChange={(e) => setForm({ ...form, sku: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Resolution (e.g. 4MP, 1080p)"
+              className="form-input"
+              value={form.resolution}
+              onChange={(e) => setForm({ ...form, resolution: e.target.value })}
+            />
+            <input
+              type="number"
+              min="0"
+              placeholder="Night vision range (m)"
+              className="form-input"
+              value={form.nightVisionM}
+              onChange={(e) => setForm({ ...form, nightVisionM: e.target.value })}
             />
 
             <div className="md:col-span-2">

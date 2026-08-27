@@ -50,6 +50,8 @@ export interface Product {
   category_id: string | null;
   image_url: string;
   is_active: boolean;
+  resolution: string | null;
+  night_vision_m: number | null;
   created_at: string;
   updated_at: string;
   category?: Category | null;
@@ -131,6 +133,7 @@ export interface SiteSettings {
   phone: string;
   secondary_phone: string;
   email: string;
+  website: string;
   address: string;
   currency: string;
   updated_at: string;

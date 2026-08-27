@@ -8,6 +8,7 @@ import { StorefrontProvider } from './hooks/useStorefront';
 import { ToastProvider } from './hooks/useToast';
 import { WishlistProvider } from './hooks/useWishlist';
 import { ThemeProvider } from './hooks/useTheme';
+import { BusinessInfoProvider } from './hooks/useBusinessInfo';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -19,7 +20,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <WishlistProvider>
             <CartProvider>
               <StorefrontProvider>
-                <App />
+                <BusinessInfoProvider>
+                  <App />
+                </BusinessInfoProvider>
               </StorefrontProvider>
             </CartProvider>
           </WishlistProvider>

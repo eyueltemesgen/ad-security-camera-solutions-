@@ -74,19 +74,23 @@ export function AdminApp() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="admin-root min-h-[60vh] flex items-center justify-center">
         <p className="text-gray-400">Loading…</p>
       </div>
     );
   }
 
   if (!user) {
-    return <AdminLogin />;
+    return (
+      <div className="admin-root">
+        <AdminLogin />
+      </div>
+    );
   }
 
   if (!profile?.role || !isAdmin) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <div className="admin-root min-h-[60vh] flex items-center justify-center px-4">
         <div className="glass-card rounded-2xl p-8 max-w-md text-center">
           <ShieldAlert className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Access Denied</h2>
@@ -110,6 +114,7 @@ export function AdminApp() {
   }
 
   return (
+    <div className="admin-root">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -157,6 +162,7 @@ export function AdminApp() {
         {tab === 'inventory' && <InventoryTab refreshSignal={refreshSignal} />}
         {tab === 'settings' && <SettingsTab />}
       </div>
+    </div>
     </div>
   );
 }

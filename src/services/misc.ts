@@ -161,6 +161,7 @@ export async function saveSiteSettings(settings: Omit<SiteSettings, 'id' | 'upda
     phone: settings.phone,
     secondary_phone: settings.secondary_phone,
     email: settings.email,
+    website: settings.website,
     address: settings.address,
     currency: settings.currency,
   });

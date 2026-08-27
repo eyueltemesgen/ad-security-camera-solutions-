@@ -47,6 +47,8 @@ export interface ProductInput {
   category_id: string | null;
   image_url: string;
   is_active: boolean;
+  resolution: string;
+  night_vision_m: number | null;
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
@@ -64,6 +66,8 @@ export async function createProduct(input: ProductInput): Promise<Product> {
       category_id: input.category_id,
       image_url: input.image_url,
       is_active: input.is_active,
+      resolution: input.resolution || null,
+      night_vision_m: input.night_vision_m ?? null,
     })
     .select(PRODUCT_SELECT)
     .single();
@@ -86,6 +90,8 @@ export async function updateProduct(id: string, input: ProductInput): Promise<vo
       category_id: input.category_id,
       image_url: input.image_url,
       is_active: input.is_active,
+      resolution: input.resolution || null,
+      night_vision_m: input.night_vision_m ?? null,
     })
     .eq('id', id);
   if (error) throw new Error(error.message);

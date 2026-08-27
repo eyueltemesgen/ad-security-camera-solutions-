@@ -13,6 +13,7 @@ export function SettingsTab() {
     phone: '',
     secondary_phone: '',
     email: '',
+    website: '',
     address: '',
     currency: 'ETB',
   });
@@ -25,6 +26,7 @@ export function SettingsTab() {
         phone: settings.data.phone,
         secondary_phone: settings.data.secondary_phone,
         email: settings.data.email,
+        website: settings.data.website,
         address: settings.data.address,
         currency: settings.data.currency,
       });
@@ -90,6 +92,14 @@ export function SettingsTab() {
               className="form-input"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Website</label>
+            <input
+              className="form-input"
+              value={form.website}
+              onChange={(e) => setForm({ ...form, website: e.target.value })}
             />
           </div>
           <div>

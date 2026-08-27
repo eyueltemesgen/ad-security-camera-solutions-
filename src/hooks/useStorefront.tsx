@@ -8,7 +8,7 @@ import {
 } from 'react';
 import type { CartItem, Product } from '../types';
 
-type ModalKind = 'auth' | 'cart' | 'checkout' | 'service' | 'product' | null;
+type ModalKind = 'auth' | 'cart' | 'checkout' | 'service' | 'product' | 'inquire' | null;
 
 interface StorefrontContextValue {
   modal: ModalKind;
@@ -20,6 +20,7 @@ interface StorefrontContextValue {
   openCheckout: (items?: CartItem[]) => void;
   openService: (serviceName: string) => void;
   openProduct: (product: Product) => void;
+  openInquire: (product: Product) => void;
   closeModal: () => void;
 }
 
@@ -46,6 +47,10 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
     setSelectedProduct(product);
     setModal('product');
   }, []);
+  const openInquire = useCallback((product: Product) => {
+    setSelectedProduct(product);
+    setModal('inquire');
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -58,9 +63,10 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
       openCheckout,
       openService,
       openProduct,
+      openInquire,
       closeModal,
     }),
-    [modal, selectedService, selectedProduct, checkoutItems, openAuth, openCart, openCheckout, openService, openProduct, closeModal]
+    [modal, selectedService, selectedProduct, checkoutItems, openAuth, openCart, openCheckout, openService, openProduct, openInquire, closeModal]
   );
 
   return <StorefrontContext.Provider value={value}>{children}</StorefrontContext.Provider>;

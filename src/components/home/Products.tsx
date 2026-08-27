@@ -30,60 +30,45 @@ export function Products() {
   }, [products.data, category, search]);
 
   return (
-    <section id="products" ref={ref} className="py-24 px-4 sm:px-6 lg:px-8 bg-panel relative overflow-hidden">
-      <div className="absolute bottom-0 right-0 w-[500px] h-[400px] bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
-
+    <section id="products" ref={ref} className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-panel relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-10 reveal">
+        <div className="text-center mb-6 md:mb-10 reveal">
           <span className="section-eyebrow">
             <SlidersHorizontal className="w-3 h-3" />
             Shop
           </span>
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+          <h2 className="text-2xl md:text-5xl font-extrabold tracking-tight">
             Featured <span className="text-gradient">Products</span>
           </h2>
-          <p className="mt-3 text-lg" style={{ color: 'var(--text-secondary)' }}>
+          <p className="mt-2 md:mt-3 text-sm md:text-lg" style={{ color: 'var(--text-secondary)' }}>
             Genuine security equipment with warranty
           </p>
         </div>
 
-        <div className="max-w-md mx-auto mb-6 relative reveal">
-          <Search className="w-4 h-4 text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" />
+        {/* Search */}
+        <div className="max-w-md mx-auto mb-4 relative reveal">
+          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, SKU or category…"
-            className="form-input pl-10"
+            className="form-input pl-10 h-12"
           />
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2 mb-10 reveal">
-          <button
-            onClick={() => setCategory('all')}
-            className={cn(
-              'px-5 py-2 rounded-full text-sm font-medium border transition-all duration-300',
-              category === 'all'
-                ? 'bg-brand-500 border-brand-500 text-white shadow-lg shadow-brand-500/20'
-                : 'border-white/10 text-gray-300 hover:border-brand-500/50 hover:bg-brand-500/5'
-            )}
-          >
-            All
-          </button>
-          {(categories.data ?? []).map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setCategory(cat.slug)}
-              className={cn(
-                'px-5 py-2 rounded-full text-sm font-medium border transition-all duration-300',
-                category === cat.slug
-                  ? 'bg-brand-500 border-brand-500 text-white shadow-lg shadow-brand-500/20'
-                  : 'border-white/10 text-gray-300 hover:border-brand-500/50 hover:bg-brand-500/5'
-              )}
-            >
-              {cat.name}
-            </button>
-          ))}
+        {/* Horizontal scrolling filter pills (swipeable on mobile) */}
+        <div className="reveal mb-8 md:mb-10 -mx-4 px-4">
+          <div className="flex gap-2 overflow-x-auto pb-2 md:flex-wrap md:justify-center scrollbar-none" style={{ scrollbarWidth: 'none' }}>
+            <FilterPill active={category === 'all'} onClick={() => setCategory('all')}>
+              All
+            </FilterPill>
+            {(categories.data ?? []).map((cat) => (
+              <FilterPill key={cat.id} active={category === cat.slug} onClick={() => setCategory(cat.slug)}>
+                {cat.name}
+              </FilterPill>
+            ))}
+          </div>
         </div>
 
         {products.loading ? (
@@ -99,7 +84,7 @@ export function Products() {
             }
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 reveal-stagger">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 reveal-stagger">
             {filtered.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -107,5 +92,34 @@ export function Products() {
         )}
       </div>
     </section>
+  );
+}
+
+function FilterPill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'flex-shrink-0 h-10 px-5 rounded-full text-sm font-medium border transition-all duration-300 whitespace-nowrap active:scale-95',
+        active
+          ? 'text-white border-transparent shadow-lg'
+          : 'hover:bg-brand-500/5'
+      )}
+      style={
+        active
+          ? { background: 'linear-gradient(145deg, #3bb37f, #1f7f57)', boxShadow: '0 6px 20px rgba(85,201,151,0.3)' }
+          : { borderColor: 'var(--border-medium)', color: 'var(--text-secondary)' }
+      }
+    >
+      {children}
+    </button>
   );
 }
