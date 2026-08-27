@@ -36,8 +36,13 @@ export function OrderInquireSheet() {
         email: form.email,
         service: 'Product Inquiry',
         preferredDate: null,
+        preferredTime: '',
         location: '',
+        propertyType: '',
+        numDevices: null,
+        currentSystem: '',
         description: `Inquiry about: ${product.name} (${product.sku ?? 'no SKU'}) — ${formatETB(product.price)}. ${form.notes}`,
+        notes: '',
         userId: user?.id ?? null,
       });
       showToast('Inquiry sent! We will get back to you shortly.', 'success');

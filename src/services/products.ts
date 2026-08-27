@@ -40,35 +40,53 @@ export async function fetchAllProducts(): Promise<Product[]> {
 export interface ProductInput {
   name: string;
   description: string;
+  short_description: string;
   price: number;
+  sale_price: number | null;
   stock: number;
   rating: number;
   sku: string;
+  brand: string;
   category_id: string | null;
   image_url: string;
   is_active: boolean;
+  featured: boolean;
+  warranty: string;
   resolution: string;
   night_vision_m: number | null;
+  specifications: { name: string; value: string }[];
+  features: string[];
+}
+
+function toInsert(input: ProductInput) {
+  return {
+    name: input.name,
+    slug: slugify(input.name),
+    description: input.description,
+    short_description: input.short_description || '',
+    price: input.price,
+    sale_price: input.sale_price ?? null,
+    stock: input.stock,
+    rating: input.rating,
+    sku: input.sku || null,
+    brand: input.brand || '',
+    category_id: input.category_id,
+    image_url: input.image_url,
+    is_active: input.is_active,
+    featured: input.featured,
+    warranty: input.warranty || '',
+    resolution: input.resolution || null,
+    night_vision_m: input.night_vision_m ?? null,
+    specifications: input.specifications || [],
+    features: input.features || [],
+  };
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
   assertSupabase();
   const { data, error } = await supabase
     .from('products')
-    .insert({
-      name: input.name,
-      slug: slugify(input.name),
-      description: input.description,
-      price: input.price,
-      stock: input.stock,
-      rating: input.rating,
-      sku: input.sku || null,
-      category_id: input.category_id,
-      image_url: input.image_url,
-      is_active: input.is_active,
-      resolution: input.resolution || null,
-      night_vision_m: input.night_vision_m ?? null,
-    })
+    .insert(toInsert(input))
     .select(PRODUCT_SELECT)
     .single();
   if (error) throw new Error(error.message);
@@ -79,21 +97,14 @@ export async function updateProduct(id: string, input: ProductInput): Promise<vo
   assertSupabase();
   const { error } = await supabase
     .from('products')
-    .update({
-      name: input.name,
-      slug: slugify(input.name),
-      description: input.description,
-      price: input.price,
-      stock: input.stock,
-      rating: input.rating,
-      sku: input.sku || null,
-      category_id: input.category_id,
-      image_url: input.image_url,
-      is_active: input.is_active,
-      resolution: input.resolution || null,
-      night_vision_m: input.night_vision_m ?? null,
-    })
+    .update(toInsert(input))
     .eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+export async function toggleProductFeature(id: string, featured: boolean): Promise<void> {
+  assertSupabase();
+  const { error } = await supabase.from('products').update({ featured }).eq('id', id);
   if (error) throw new Error(error.message);
 }
 

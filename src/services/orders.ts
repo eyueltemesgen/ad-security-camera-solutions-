@@ -6,6 +6,8 @@ export interface CheckoutInput {
   customerEmail: string;
   customerPhone: string;
   deliveryAddress: string;
+  city: string;
+  deliveryNotes: string;
   paymentMethod: PaymentMethod;
   items: { product_id: string; quantity: number }[];
 }
@@ -23,11 +25,19 @@ export async function placeOrder(input: CheckoutInput): Promise<Order> {
     p_customer_email: input.customerEmail,
     p_customer_phone: input.customerPhone,
     p_delivery_address: input.deliveryAddress,
+    p_city: input.city || '',
+    p_delivery_notes: input.deliveryNotes || '',
     p_payment_method: input.paymentMethod,
     p_items: input.items,
   });
   if (error) throw new Error(error.message);
   return data as Order;
+}
+
+export async function updateOrderAdminNotes(id: string, notes: string): Promise<void> {
+  assertSupabase();
+  const { error } = await supabase.from('orders').update({ admin_notes: notes }).eq('id', id);
+  if (error) throw new Error(error.message);
 }
 
 export async function fetchMyOrders(userId: string): Promise<Order[]> {

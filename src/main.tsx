@@ -9,6 +9,7 @@ import { ToastProvider } from './hooks/useToast';
 import { WishlistProvider } from './hooks/useWishlist';
 import { ThemeProvider } from './hooks/useTheme';
 import { BusinessInfoProvider } from './hooks/useBusinessInfo';
+import { SiteContentProvider } from './hooks/useSiteContent';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -21,7 +22,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <CartProvider>
               <StorefrontProvider>
                 <BusinessInfoProvider>
-                  <App />
+                  <SiteContentProvider>
+                    <App />
+                  </SiteContentProvider>
                 </BusinessInfoProvider>
               </StorefrontProvider>
             </CartProvider>

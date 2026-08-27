@@ -34,6 +34,8 @@ interface AuthContextValue {
   signUp: (input: SignUpInput) => Promise<AuthResult>;
   /** Re-send the signup confirmation email (for Option-B confirmation flow). */
   resendConfirmation: (email: string) => Promise<string | null>;
+  sendPasswordReset: (email: string) => Promise<string | null>;
+  updatePassword: (newPassword: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   updateProfile: (updates: {
     full_name?: string;
@@ -160,6 +162,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return error ? error.message : null;
   }, []);
 
+  const sendPasswordReset = useCallback(async (email: string) => {
+    if (!isSupabaseConfigured) return notConfigured().error;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return error ? error.message : null;
+  }, []);
+
+  const updatePassword = useCallback(async (newPassword: string) => {
+    if (!isSupabaseConfigured) return notConfigured().error;
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    return error ? error.message : null;
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
@@ -192,11 +208,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signUp,
       resendConfirmation,
+      sendPasswordReset,
+      updatePassword,
       signOut,
       updateProfile,
       refreshProfile,
     }),
-    [session, profile, loading, signIn, signUp, resendConfirmation, signOut, updateProfile, refreshProfile]
+    [session, profile, loading, signIn, signUp, resendConfirmation, sendPasswordReset, updatePassword, signOut, updateProfile, refreshProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

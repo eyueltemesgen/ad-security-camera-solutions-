@@ -12,7 +12,7 @@ import { toTel, useBusinessInfo } from '../../hooks/useBusinessInfo';
 export function Contact() {
   const { showToast } = useToast();
   const info = useBusinessInfo();
-  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const ref = useReveal<HTMLDivElement>();
 
@@ -22,7 +22,7 @@ export function Contact() {
     try {
       await createContactMessage(form);
       showToast('Message sent! We will get back to you shortly.', 'success');
-      setForm({ name: '', email: '', phone: '', message: '' });
+      setForm({ name: '', email: '', phone: '', subject: '', message: '' });
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to send message', 'error');
     } finally {

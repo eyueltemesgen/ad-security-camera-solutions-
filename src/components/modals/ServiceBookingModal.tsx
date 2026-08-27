@@ -31,8 +31,13 @@ export function ServiceBookingModal() {
         phone: form.phone,
         service: selectedService,
         preferredDate: form.date || null,
+        preferredTime: '',
         location: form.location,
+        propertyType: '',
+        numDevices: null,
+        currentSystem: '',
         description: form.description,
+        notes: '',
         userId: user?.id ?? null,
       });
       showToast('Service booked! We will contact you shortly.', 'success');

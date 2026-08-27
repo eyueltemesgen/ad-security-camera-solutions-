@@ -3,6 +3,7 @@ import type {
   AppNotification,
   ContactMessage,
   ServiceRequest,
+  ServiceRequestFile,
   ServiceStatus,
   SiteSettings,
 } from '../types';
@@ -15,31 +16,46 @@ export interface ServiceRequestInput {
   email: string;
   service: string;
   preferredDate: string | null;
+  preferredTime: string;
   location: string;
+  propertyType: string;
+  numDevices: number | null;
+  currentSystem: string;
   description: string;
+  notes: string;
   userId: string | null;
 }
 
-export async function createServiceRequest(input: ServiceRequestInput): Promise<void> {
+export async function createServiceRequest(input: ServiceRequestInput): Promise<string> {
   assertSupabase();
-  const { error } = await supabase.from('service_requests').insert({
-    user_id: input.userId,
-    customer_name: input.customerName,
-    phone: input.phone,
-    email: input.email,
-    service: input.service,
-    preferred_date: input.preferredDate,
-    location: input.location,
-    description: input.description,
-  });
+  const { data, error } = await supabase
+    .from('service_requests')
+    .insert({
+      user_id: input.userId,
+      customer_name: input.customerName,
+      phone: input.phone,
+      email: input.email,
+      service: input.service,
+      preferred_date: input.preferredDate,
+      preferred_time: input.preferredTime,
+      location: input.location,
+      property_type: input.propertyType,
+      num_devices: input.numDevices || null,
+      current_system: input.currentSystem,
+      description: input.description,
+      notes: input.notes,
+    })
+    .select('id')
+    .single();
   if (error) throw new Error(error.message);
+  return (data as { id: string }).id;
 }
 
 export async function fetchMyServiceRequests(userId: string): Promise<ServiceRequest[]> {
   assertSupabase();
   const { data, error } = await supabase
     .from('service_requests')
-    .select('*')
+    .select('*, files:service_request_files(*)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
@@ -50,7 +66,7 @@ export async function fetchServiceRequests(): Promise<ServiceRequest[]> {
   assertSupabase();
   const { data, error } = await supabase
     .from('service_requests')
-    .select('*')
+    .select('*, files:service_request_files(*)')
     .order('created_at', { ascending: false })
     .limit(250);
   if (error) throw new Error(error.message);
@@ -66,12 +82,53 @@ export async function updateServiceRequestStatus(
   if (error) throw new Error(error.message);
 }
 
+export async function updateServiceRequestNotes(
+  id: string,
+  notes: string,
+  assignedStaff: string,
+  scheduledDate: string | null
+): Promise<void> {
+  assertSupabase();
+  const { error } = await supabase
+    .from('service_requests')
+    .update({ admin_notes: notes, assigned_staff: assignedStaff, scheduled_date: scheduledDate })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+export async function attachServiceRequestFile(
+  requestId: string,
+  file: { url: string; file_name: string; file_type: string; file_size: number; kind: 'image' | 'document' }
+): Promise<void> {
+  assertSupabase();
+  const { error } = await supabase.from('service_request_files').insert({
+    request_id: requestId,
+    url: file.url,
+    file_name: file.file_name,
+    file_type: file.file_type,
+    file_size: file.file_size,
+    kind: file.kind,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function fetchServiceRequestFiles(requestId: string): Promise<ServiceRequestFile[]> {
+  assertSupabase();
+  const { data, error } = await supabase
+    .from('service_request_files')
+    .select('*')
+    .eq('request_id', requestId);
+  if (error) throw new Error(error.message);
+  return (data as ServiceRequestFile[] | null) ?? [];
+}
+
 // ------------------------------------------------------------------ contact
 
 export async function createContactMessage(input: {
   name: string;
   email: string;
   phone: string;
+  subject: string;
   message: string;
 }): Promise<void> {
   assertSupabase();
@@ -79,6 +136,7 @@ export async function createContactMessage(input: {
     name: input.name,
     email: input.email,
     phone: input.phone,
+    subject: input.subject,
     message: input.message,
   });
   if (error) throw new Error(error.message);
@@ -153,7 +211,9 @@ export async function fetchSiteSettings(): Promise<SiteSettings | null> {
   return (data as SiteSettings | null) ?? null;
 }
 
-export async function saveSiteSettings(settings: Omit<SiteSettings, 'id' | 'updated_at'>): Promise<void> {
+export type SiteSettingsInput = Omit<SiteSettings, 'id' | 'updated_at'>;
+
+export async function saveSiteSettings(settings: SiteSettingsInput): Promise<void> {
   assertSupabase();
   const { error } = await supabase.from('site_settings').upsert({
     id: true,
@@ -164,6 +224,24 @@ export async function saveSiteSettings(settings: Omit<SiteSettings, 'id' | 'upda
     website: settings.website,
     address: settings.address,
     currency: settings.currency,
+    logo_url: settings.logo_url,
+    favicon_url: settings.favicon_url,
+    tagline: settings.tagline,
+    description: settings.description,
+    working_hours: settings.working_hours,
+    facebook: settings.facebook,
+    youtube: settings.youtube,
+    whatsapp: settings.whatsapp,
+    tiktok: settings.tiktok,
+    telegram: settings.telegram,
+    instagram: settings.instagram,
+    linkedin: settings.linkedin,
+    primary_color: settings.primary_color,
+    accent_color: settings.accent_color,
+    seo_title: settings.seo_title,
+    seo_description: settings.seo_description,
+    seo_image: settings.seo_image,
+    footer_text: settings.footer_text,
   });
   if (error) throw new Error(error.message);
 }

@@ -2,21 +2,41 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Save, Settings } from 'lucide-react';
 import { useQuery } from '../../hooks/useQuery';
 import { useToast } from '../../hooks/useToast';
-import { fetchSiteSettings, saveSiteSettings } from '../../services/misc';
+import { fetchSiteSettings, saveSiteSettings, type SiteSettingsInput } from '../../services/misc';
 import { ErrorBox, Spinner } from '../../components/ui';
+
+const DEFAULTS: SiteSettingsInput = {
+  company_name: '',
+  phone: '',
+  secondary_phone: '',
+  email: '',
+  website: '',
+  address: '',
+  currency: 'ETB',
+  logo_url: '',
+  favicon_url: '',
+  tagline: '',
+  description: '',
+  working_hours: '',
+  facebook: '',
+  youtube: '',
+  whatsapp: '',
+  tiktok: '',
+  telegram: '',
+  instagram: '',
+  linkedin: '',
+  primary_color: '#1b4d2e',
+  accent_color: '#55c997',
+  seo_title: '',
+  seo_description: '',
+  seo_image: '',
+  footer_text: '',
+};
 
 export function SettingsTab() {
   const { showToast } = useToast();
   const settings = useQuery(() => fetchSiteSettings(), []);
-  const [form, setForm] = useState({
-    company_name: '',
-    phone: '',
-    secondary_phone: '',
-    email: '',
-    website: '',
-    address: '',
-    currency: 'ETB',
-  });
+  const [form, setForm] = useState<SiteSettingsInput>(DEFAULTS);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -29,6 +49,24 @@ export function SettingsTab() {
         website: settings.data.website,
         address: settings.data.address,
         currency: settings.data.currency,
+        logo_url: settings.data.logo_url,
+        favicon_url: settings.data.favicon_url,
+        tagline: settings.data.tagline,
+        description: settings.data.description,
+        working_hours: settings.data.working_hours,
+        facebook: settings.data.facebook,
+        youtube: settings.data.youtube,
+        whatsapp: settings.data.whatsapp,
+        tiktok: settings.data.tiktok,
+        telegram: settings.data.telegram,
+        instagram: settings.data.instagram,
+        linkedin: settings.data.linkedin,
+        primary_color: settings.data.primary_color,
+        accent_color: settings.data.accent_color,
+        seo_title: settings.data.seo_title,
+        seo_description: settings.data.seo_description,
+        seo_image: settings.data.seo_image,
+        footer_text: settings.data.footer_text,
       });
     }
   }, [settings.data]);

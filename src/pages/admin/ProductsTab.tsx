@@ -33,14 +33,19 @@ const PAGE_SIZE = 6;
 interface FormState {
   id: string | null;
   name: string;
+  brand: string;
   price: string;
+  salePrice: string;
   stock: string;
   rating: string;
   sku: string;
   categoryId: string;
   description: string;
+  shortDescription: string;
+  warranty: string;
   imageUrl: string;
   isActive: boolean;
+  featured: boolean;
   resolution: string;
   nightVisionM: string;
 }
@@ -48,14 +53,19 @@ interface FormState {
 const EMPTY_FORM: FormState = {
   id: null,
   name: '',
+  brand: '',
   price: '',
+  salePrice: '',
   stock: '10',
   rating: '0',
   sku: '',
   categoryId: '',
   description: '',
+  shortDescription: '',
+  warranty: '',
   imageUrl: '',
   isActive: true,
+  featured: false,
   resolution: '',
   nightVisionM: '',
 };
@@ -98,14 +108,19 @@ export function ProductsTab({ refreshSignal }: { refreshSignal: number }) {
     setForm({
       id: product.id,
       name: product.name,
+      brand: product.brand ?? '',
       price: String(product.price),
+      salePrice: product.sale_price == null ? '' : String(product.sale_price),
       stock: String(product.stock),
       rating: String(product.rating),
       sku: product.sku ?? '',
       categoryId: product.category_id ?? '',
       description: product.description,
+      shortDescription: product.short_description ?? '',
+      warranty: product.warranty ?? '',
       imageUrl: product.image_url,
       isActive: product.is_active,
+      featured: product.featured ?? false,
       resolution: product.resolution ?? '',
       nightVisionM: product.night_vision_m == null ? '' : String(product.night_vision_m),
     });
@@ -125,10 +140,15 @@ export function ProductsTab({ refreshSignal }: { refreshSignal: number }) {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const price = Number(form.price.replace(/[, ]/g, ''));
+    const salePrice = form.salePrice === '' ? null : Number(form.salePrice.replace(/[, ]/g, ''));
     const stock = Number(form.stock);
     const rating = Number(form.rating || '0');
     if (!Number.isFinite(price) || price < 0) {
       showToast('Enter a valid price', 'error');
+      return;
+    }
+    if (salePrice != null && (!Number.isFinite(salePrice) || salePrice < 0)) {
+      showToast('Enter a valid sale price', 'error');
       return;
     }
     if (!Number.isFinite(stock) || stock < 0) {
@@ -142,16 +162,23 @@ export function ProductsTab({ refreshSignal }: { refreshSignal: number }) {
 
     const input: ProductInput = {
       name: form.name.trim(),
+      short_description: form.shortDescription.trim(),
       description: form.description.trim(),
+      warranty: form.warranty.trim(),
+      brand: form.brand.trim(),
       price,
+      sale_price: salePrice,
       stock,
       rating,
       sku: form.sku.trim(),
       category_id: form.categoryId || null,
       image_url: form.imageUrl,
       is_active: form.isActive,
+      featured: form.featured,
       resolution: form.resolution.trim(),
       night_vision_m: form.nightVisionM === '' ? null : Number(form.nightVisionM),
+      specifications: [],
+      features: [],
     };
 
     setBusy(true);

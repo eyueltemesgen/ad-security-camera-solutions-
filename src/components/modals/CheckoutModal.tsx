@@ -26,6 +26,8 @@ export function CheckoutModal() {
     email: '',
     phone: '',
     address: '',
+    city: '',
+    notes: '',
     payment: 'telebirr' as PaymentMethod,
   });
   const [busy, setBusy] = useState(false);
@@ -57,6 +59,8 @@ export function CheckoutModal() {
         customerEmail: form.email || user.email || '',
         customerPhone: form.phone,
         deliveryAddress: form.address,
+        city: form.city,
+        deliveryNotes: form.notes,
         paymentMethod: form.payment,
         items: items.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
       });
@@ -132,6 +136,20 @@ export function CheckoutModal() {
                 className="form-input"
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="City"
+                className="form-input"
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="Delivery notes (optional)"
+                className="form-input"
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
               />
               <select
                 className="form-input"
