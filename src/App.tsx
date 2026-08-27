@@ -1,13 +1,28 @@
 import { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { DatabaseZap } from 'lucide-react';
 import { isSupabaseConfigured } from './lib/supabase';
-import { Header } from './components/Header';
+import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { AccountPage } from './pages/AccountPage';
+import { ProductsPage } from './pages/ProductsPage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
+import { ServicesPage } from './pages/ServicesPage';
+import { ServiceDetailPage } from './pages/ServiceDetailPage';
+import { AboutPage } from './pages/AboutPage';
+import { GalleryPage } from './pages/GalleryPage';
+import { FaqPage } from './pages/FaqPage';
+import { ContactPage } from './pages/ContactPage';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { CartPage } from './pages/CartPage';
+import { CheckoutPage } from './pages/CheckoutPage';
+import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
+import { RequestServicePage } from './pages/RequestServicePage';
 
-// Admin (recharts + management UI) is code-split to keep the storefront light.
-// It is intentionally NOT linked from any storefront navigation — /admin only.
+// Admin is code-split to keep the storefront light. Reachable only via /admin.
 const AdminApp = lazy(() => import('./pages/admin/AdminApp').then((m) => ({ default: m.AdminApp })));
 
 export function App() {
@@ -17,7 +32,7 @@ export function App() {
   return (
     <Routes>
       <Route
-        path="/admin"
+        path="/admin/*"
         element={
           <Suspense
             fallback={
@@ -30,24 +45,35 @@ export function App() {
           </Suspense>
         }
       />
-      <Route
-        path="*"
-        element={
-          <>
-            <Header />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/account" element={<AccountPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </>
-        }
-      />
+
+      <Route element={<Layout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:slug" element={<ProductDetailPage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/services/:slug" element={<ServiceDetailPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/faq" element={<FaqPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+        <Route path="/request-service" element={<RequestServicePage />} />
+        <Route path="/account" element={<AccountPage />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Route>
     </Routes>
   );
 }
 
-function NotFound() {
+function PageNotFound() {
+  const location = useLocation();
+  void location;
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <div className="glass-card rounded-2xl p-8 text-center">

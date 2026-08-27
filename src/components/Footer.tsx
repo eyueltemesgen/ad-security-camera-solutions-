@@ -1,30 +1,35 @@
 import { Camera, Globe, Mail, MapPin, Phone } from 'lucide-react';
 import { toTel, useBusinessInfo } from '../hooks/useBusinessInfo';
+import { useSiteContent } from '../hooks/useSiteContent';
 
-const QUICK_LINKS = [
-  { href: '/#home', label: 'Home' },
-  { href: '/#services', label: 'Services' },
-  { href: '/#products', label: 'Products' },
-  { href: '/#about', label: 'About' },
-  { href: '/#contact', label: 'Contact' },
-];
+const SOCIAL_ICONS: Record<string, string> = {
+  instagram: 'Instagram',
+  send: 'Telegram',
+  music: 'TikTok',
+  facebook: 'Facebook',
+  youtube: 'YouTube',
+  whatsapp: 'WhatsApp',
+  linkedin: 'LinkedIn',
+};
 
-const SERVICE_LINKS = ['CCTV Systems', 'Network Solutions', 'Time Attendance', 'Video Intercom', 'Web & IT'];
-
-/** Footer with tap-to-call, email anchor, map address metadata. No admin link. */
 export function Footer() {
   const info = useBusinessInfo();
+  const { footer, social } = useSiteContent();
 
   return (
     <footer className="border-t pb-20 md:pb-0" style={{ borderColor: 'var(--border-soft)', background: 'var(--bg-panel)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-10 h-10 rounded-full border-2 border-brand-500/40 flex items-center justify-center bg-gradient-to-br from-brand-500/20 to-brand-700/20">
-                <Camera className="w-5 h-5 text-brand-400" />
-              </div>
+              {info.logoUrl ? (
+                <img src={info.logoUrl} alt={info.companyName} className="w-10 h-10 object-contain rounded-full" />
+              ) : (
+                <div className="w-10 h-10 rounded-full border-2 border-brand-500/40 flex items-center justify-center bg-gradient-to-br from-brand-500/20 to-brand-700/20">
+                  <Camera className="w-5 h-5 text-brand-400" />
+                </div>
+              )}
               <div>
                 <span className="text-base font-extrabold leading-none">
                   <span className="text-gradient">AD</span> Security
@@ -35,35 +40,44 @@ export function Footer() {
               </div>
             </div>
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Professional security and IT solutions trusted by clients across Ethiopia.
+              {info.footerText || info.description}
             </p>
-          </div>
-
-          {/* Quick links */}
-          <div>
-            <h5 className="font-semibold mb-3 text-sm">Quick Links</h5>
-            <ul className="space-y-2 text-sm">
-              {QUICK_LINKS.map((l) => (
-                <li key={l.label}>
-                  <a href={l.href} className="hover:text-brand-400 transition-colors" style={{ color: 'var(--text-secondary)' }}>
-                    {l.label}
+            {social.length > 0 && (
+              <div className="flex gap-3 mt-4">
+                {social.map((s) => (
+                  <a
+                    key={s.id}
+                    href={s.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={`${s.platform} — ${s.username}`}
+                    className="w-9 h-9 rounded-full flex items-center justify-center border text-sm font-semibold hover:bg-brand-500/10 transition-colors"
+                    style={{ borderColor: 'var(--border-medium)', color: 'var(--text-secondary)' }}
+                  >
+                    {(SOCIAL_ICONS[s.icon] ?? s.platform).slice(0, 1)}
                   </a>
-                </li>
-              ))}
-            </ul>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Services */}
-          <div>
-            <h5 className="font-semibold mb-3 text-sm">Services</h5>
-            <ul className="space-y-2 text-sm">
-              {SERVICE_LINKS.map((s) => (
-                <li key={s} style={{ color: 'var(--text-secondary)' }}>{s}</li>
-              ))}
-            </ul>
-          </div>
+          {/* Footer CMS columns */}
+          {footer.map((col) => (
+            <div key={col.id}>
+              <h5 className="font-semibold mb-3 text-sm">{col.title}</h5>
+              <ul className="space-y-2 text-sm">
+                {(col.links ?? []).map((link, i) => (
+                  <li key={i}>
+                    <a href={link.url} className="hover:text-brand-400 transition-colors" style={{ color: 'var(--text-secondary)' }}>
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
 
-          {/* Contact — tap-to-call + email + address */}
+          {/* Contact */}
           <div>
             <h5 className="font-semibold mb-3 text-sm">Contact</h5>
             <ul className="space-y-2.5 text-sm">
@@ -83,13 +97,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(info.address)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-2 hover:text-brand-400 transition-colors"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
+                <a href={`https://maps.google.com/?q=${encodeURIComponent(info.address)}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-brand-400 transition-colors" style={{ color: 'var(--text-secondary)' }}>
                   <MapPin className="w-4 h-4 text-brand-400" /> {info.address}
                 </a>
               </li>
