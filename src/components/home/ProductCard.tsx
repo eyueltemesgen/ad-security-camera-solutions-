@@ -1,146 +1,81 @@
-import { Camera, Eye, Heart, Moon, Package, ShoppingCart, Zap } from 'lucide-react';
-import type { Product } from '../../types';
-import { cn, formatETB, stockLabel, stockLevel } from '../../lib/utils';
-import { useAuth } from '../../hooks/useAuth';
+import { Link } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
-import { useStorefront } from '../../hooks/useStorefront';
 import { useToast } from '../../hooks/useToast';
-import { useWishlist } from '../../hooks/useWishlist';
-import { Stars } from '../ui';
+import { useAuth } from '../../hooks/useAuth';
+import { formatMoney } from '../ui';
+import type { Product } from '../../types';
 
-export function ProductCard({ product }: { product: Product }) {
-  const { user } = useAuth();
+export default function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
-  const { toggle, isWishlisted } = useWishlist();
-  const { openProduct, openInquire, openAuth, openCheckout } = useStorefront();
-  const { showToast } = useToast();
+  const { toast } = useToast();
+  const { user } = useAuth();
 
-  const level = stockLevel(product);
-  const outOfStock = level === 'out';
+  const inStock = product.stock > 0;
+  const price = product.sale_price ?? product.price;
+  const image = product.image_url || product.images?.[0]?.url || '';
 
-  const handleAdd = () => {
-    if (outOfStock) return;
-    addItem(product);
-    showToast(`${product.name} added to cart`, 'success');
-  };
-
-  const handleOrderNow = () => {
-    if (outOfStock) return;
+  const handleAdd = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!user) {
-      openAuth();
-      showToast('Sign in to place an order', 'info');
+      toast('Please login to add items to your cart', 'info');
       return;
     }
-    openCheckout([{ product, quantity: 1 }]);
-  };
-
-  const handleWishlist = async () => {
-    const result = await toggle(product.id);
-    if (result === 'needs-auth') {
-      openAuth();
-      showToast('Sign in to use your wishlist', 'info');
+    try {
+      await addItem(product.id);
+      toast('Added to cart');
+    } catch (err) {
+      toast((err as Error).message, 'error');
     }
   };
 
   return (
-    <div className="glass-card glass-card-hover rounded-2xl overflow-hidden group">
-      {/* Image area */}
-      <div className="relative h-52 md:h-48 overflow-hidden" style={{ background: 'var(--bg-input)' }}>
-        {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
+    <Link
+      to={`/products/${product.slug}`}
+      className="group card flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+        {image ? (
+          <img src={image} alt={product.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Camera className="w-12 h-12 text-brand-400/40" />
+          <div className="flex h-full items-center justify-center text-slate-300">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><rect x="2" y="4" width="20" height="16" rx="2" /><circle cx="12" cy="13" r="3" /></svg>
           </div>
         )}
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        <span className={cn('stock-badge absolute top-3 right-3 backdrop-blur-sm', `stock-${level}`)}>
-          {stockLabel(product)}
+        {product.sale_price && product.sale_price < product.price ? (
+          <span className="absolute left-3 top-3 badge bg-red-600 text-white">Sale</span>
+        ) : null}
+        {!inStock && (
+          <span className="absolute right-3 top-3 badge bg-slate-900 text-white">Out of Stock</span>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          {product.category?.name ?? 'Security Equipment'}
         </span>
-
-        <button
-          onClick={() => void handleWishlist()}
-          className={cn(
-            'absolute top-3 left-3 w-11 h-11 flex items-center justify-center rounded-full border backdrop-blur-sm transition-all active:scale-95',
-            isWishlisted(product.id)
-              ? 'bg-red-500/20 text-red-500 border-red-500/40'
-              : 'bg-black/20 text-white border-white/20'
-          )}
-          title="Wishlist"
-          aria-label="Wishlist"
-        >
-          <Heart className={cn('w-5 h-5', isWishlisted(product.id) && 'fill-red-500')} />
-        </button>
-
-        <button
-          onClick={() => openProduct(product)}
-          className="absolute bottom-0 left-0 right-0 text-white py-3 text-xs font-semibold flex items-center justify-center gap-1.5 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-300"
-          style={{ background: 'linear-gradient(145deg, rgba(59,179,127,0.95), rgba(31,127,87,0.95))' }}
-        >
-          <Eye className="w-3.5 h-3.5" /> Quick View
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        <h4 className="font-bold text-base leading-tight line-clamp-2">{product.name}</h4>
-
-        {/* Key specs (Resolution, Night Vision) */}
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {product.resolution && (
-            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)' }}>
-              <Camera className="w-3 h-3" /> {product.resolution}
-            </span>
-          )}
-          {product.night_vision_m != null && product.night_vision_m > 0 && (
-            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)' }}>
-              <Moon className="w-3 h-3" /> Night vision {product.night_vision_m}m
-            </span>
-          )}
-          {!product.resolution && !(product.night_vision_m != null && product.night_vision_m > 0) && (
-            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)' }}>
-              <Package className="w-3 h-3" /> {product.category?.name ?? 'Camera'}
-            </span>
-          )}
+        <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-slate-900">{product.name}</h3>
+        {product.brand && <span className="mt-0.5 text-xs text-slate-400">{product.brand}</span>}
+        <div className="mt-3 flex items-end justify-between gap-2">
+          <div>
+            {product.sale_price && (
+              <span className="mr-2 text-xs text-slate-400 line-through">{formatMoney(product.price)}</span>
+            )}
+            <span className="text-base font-bold text-[var(--primary)]">{formatMoney(price)}</span>
+          </div>
+          <span className="text-xs font-medium text-emerald-600">{inStock ? `${product.stock} in stock` : '—'}</span>
         </div>
-
-        <div className="flex items-center gap-1.5 text-xs mt-2">
-          <Stars rating={product.rating} />
-          <span style={{ color: 'var(--text-muted)' }}>({product.rating.toFixed(1)})</span>
-        </div>
-
-        <div className="flex items-center justify-between mt-3">
-          <span className="text-xl md:text-2xl font-extrabold text-orange-500">{formatETB(product.price)}</span>
-          <span className="text-xs px-2 py-1 rounded-full" style={{ color: 'var(--text-muted)', background: 'var(--bg-input)' }}>
-            {product.category?.name ?? 'General'}
-          </span>
-        </div>
-
-        {/* Broad Order / Inquire */}
-        <button
-          onClick={() => openInquire(product)}
-          disabled={outOfStock}
-          className="btn-orange w-full h-12 mt-4 text-sm font-semibold"
-        >
-          <Zap className="w-4 h-4" /> Order / Inquire
-        </button>
-
-        <div className="flex gap-2 mt-2">
-          <button onClick={handleAdd} disabled={outOfStock} className="btn-primary flex-1 text-xs h-11 px-3">
-            <ShoppingCart className="w-3.5 h-3.5" /> Add to Cart
+        <div className="mt-4 flex gap-2">
+          <button
+            className="btn btn-primary btn-sm flex-1"
+            disabled={!inStock}
+            onClick={handleAdd}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            Add to Cart
           </button>
-          <button onClick={handleOrderNow} disabled={outOfStock} className="btn-purple flex-1 text-xs h-11 px-3">
-            Order Now
-          </button>
+          <span className="btn btn-outline btn-sm shrink-0">Details</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

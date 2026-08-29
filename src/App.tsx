@@ -1,85 +1,127 @@
-import { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
-import { DatabaseZap } from 'lucide-react';
-import { isSupabaseConfigured } from './lib/supabase';
-import { Header } from './components/Header';
-import { HomePage } from './pages/HomePage';
-import { AccountPage } from './pages/AccountPage';
+import { useEffect } from 'react';
+import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './hooks/useAuth';
+import { CartProvider } from './hooks/useCart';
+import { CmsProvider } from './hooks/useCms';
+import { ToastProvider } from './hooks/useToast';
 
-// Admin (recharts + management UI) is code-split to keep the storefront light.
-// It is intentionally NOT linked from any storefront navigation — /admin only.
-const AdminApp = lazy(() => import('./pages/admin/AdminApp').then((m) => ({ default: m.AdminApp })));
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
 
-export function App() {
-  if (!isSupabaseConfigured) {
-    return <SetupNotice />;
+import HomePage from './pages/HomePage';
+import ProductsPage from './pages/ProductsPage';
+import ProductDetailsPage from './pages/ProductDetailsPage';
+import ServicesPage from './pages/ServicesPage';
+import ServiceDetailsPage from './pages/ServiceDetailsPage';
+import AboutPage from './pages/AboutPage';
+import GalleryPage from './pages/GalleryPage';
+import FaqPage from './pages/FaqPage';
+import ContactPage from './pages/ContactPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import RequestServicePage from './pages/RequestServicePage';
+import RequestServiceSuccessPage from './pages/RequestServiceSuccessPage';
+
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+
+import CustomerLayout from './pages/customer/CustomerLayout';
+import DashboardOverview from './pages/customer/DashboardOverview';
+import { MyOrdersPage, OrderDetailPage } from './pages/customer/OrdersPages';
+import { MyServiceRequestsPage, ServiceRequestDetailPage } from './pages/customer/ServiceRequestPages';
+import NotificationsPage from './pages/customer/NotificationsPage';
+import ProfilePage from './pages/customer/ProfilePage';
+
+import AdminApp from './pages/admin/AdminApp';
+import { NotFoundPage } from './pages/ErrorPages';
+
+function ScrollToTop() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  return null;
+}
+
+function PublicLayout() {
+  const location = useLocation();
+  const isAdminArea = location.pathname.startsWith('/admin');
+  return (
+    <>
+      {!isAdminArea && <Header />}
+      <main>{isAdminArea ? (
+        <Routes>
+          <Route path="/admin/*" element={<AdminApp />} />
+        </Routes>
+      ) : (
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products/:slug" element={<ProductDetailsPage />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/services/:slug" element={<ServiceDetailsPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/faq" element={<FaqPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order-confirmation/:id" element={<OrderConfirmationPage />} />
+          <Route path="/request-service" element={<RequestServicePage />} />
+          <Route path="/request-service/success" element={<RequestServiceSuccessPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+          <Route path="/dashboard" element={<CustomerLayout />}>
+            <Route index element={<DashboardOverview />} />
+            <Route path="orders" element={<MyOrdersPage />} />
+            <Route path="orders/:id" element={<OrderDetailPage />} />
+            <Route path="services" element={<MyServiceRequestsPage />} />
+            <Route path="services/:id" element={<ServiceRequestDetailPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
+
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      )}</main>
+      {!isAdminArea && <Footer />}
+    </>
+  );
+}
+
+function AppShell() {
+  const { loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-slate-50">
+        <span className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
+        <span className="text-sm text-slate-400">Loading…</span>
+      </div>
+    );
   }
+  return <PublicLayout />;
+}
+
+export default function App() {
   return (
-    <Routes>
-      <Route
-        path="/admin"
-        element={
-          <Suspense
-            fallback={
-              <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-page)' }}>
-                <p style={{ color: 'var(--text-muted)' }}>Loading admin…</p>
-              </div>
-            }
-          >
-            <AdminApp />
-          </Suspense>
-        }
-      />
-      <Route
-        path="*"
-        element={
-          <>
-            <Header />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/account" element={<AccountPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </>
-        }
-      />
-    </Routes>
+    <BrowserRouter>
+      <ScrollToTop />
+      <ToastProvider>
+        <AuthProvider>
+          <CmsProvider>
+            <CartProvider>
+              <AppShell />
+            </CartProvider>
+          </CmsProvider>
+        </AuthProvider>
+      </ToastProvider>
+    </BrowserRouter>
   );
 }
 
-function NotFound() {
-  return (
-    <div className="min-h-[60vh] flex items-center justify-center px-4">
-      <div className="glass-card rounded-2xl p-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">404</h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">This page doesn't exist.</p>
-        <a href="/" className="btn-primary px-8 py-2.5">
-          Go Home
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function SetupNotice() {
-  return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-night">
-      <div className="glass-card rounded-2xl p-8 max-w-lg text-center">
-        <DatabaseZap className="w-12 h-12 text-amber-600 dark:text-amber-400 mx-auto mb-4" />
-        <h2 className="text-xl font-bold mb-3">Supabase setup required</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          This app needs a Supabase project. Set the environment variables and restart the dev server:
-        </p>
-        <ol className="text-left text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
-          <li>1. Create a project at <span className="text-brand-500 dark:text-blue-400">supabase.com</span></li>
-          <li>2. Run the SQL in <code className="text-brand-300 dark:text-blue-300">supabase/migrations/</code> (or use the Supabase CLI)</li>
-          <li>3. Copy <code className="text-brand-300 dark:text-blue-300">.env.example</code> to <code className="text-brand-300 dark:text-blue-300">.env</code> and fill in your Project URL + anon key</li>
-          <li>4. Restart the dev server</li>
-        </ol>
-        <p className="text-xs text-gray-500">
-          See <code className="text-brand-300 dark:text-blue-300">README.md</code> for the full setup guide.
-        </p>
-      </div>
-    </div>
-  );
-}
+export { Link };

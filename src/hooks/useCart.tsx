@@ -7,92 +7,87 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { CartItem, Product } from '../types';
-import { calcTotals } from '../lib/utils';
+import { apiDelete, apiGet, apiPatch, apiPost } from '../lib/api';
+import type { CartLine } from '../types';
+import { useAuth } from './useAuth';
 
-const STORAGE_KEY = 'ad_cart';
-
-interface CartContextValue {
-  items: CartItem[];
-  itemCount: number;
+interface CartCtx {
+  items: CartLine[];
+  loading: boolean;
+  count: number;
   subtotal: number;
-  tax: number;
-  total: number;
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  setQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
+  addItem: (productId: string, quantity?: number) => Promise<void>;
+  updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
+  removeItem: (cartItemId: string) => Promise<void>;
+  clear: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
-const CartContext = createContext<CartContextValue | null>(null);
+const Ctx = createContext<CartCtx | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as CartItem[]) : [];
-    } catch {
-      return [];
+  const { user } = useAuth();
+  const [items, setItems] = useState<CartLine[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const refresh = useCallback(async () => {
+    if (!user) {
+      setItems([]);
+      return;
     }
-  });
+    setLoading(true);
+    try {
+      const res = await apiGet<{ cart_id: string; items: CartLine[] }>('/api/cart');
+      setItems(res.items);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      // storage unavailable — cart simply won't persist
-    }
-  }, [items]);
+    refresh().catch(() => setItems([]));
+  }, [refresh]);
 
-  const addItem = useCallback((product: Product, quantity = 1) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.product.id === product.id
-            ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock || i.quantity + quantity) }
-            : i
-        );
-      }
-      return [...prev, { product, quantity }];
-    });
+  const addItem = useCallback(
+    async (productId: string, quantity = 1) => {
+      await apiPost('/api/cart/items', { product_id: productId, quantity });
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const updateQuantity = useCallback(
+    async (cartItemId: string, quantity: number) => {
+      await apiPatch(`/api/cart/items/${cartItemId}`, { quantity });
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const removeItem = useCallback(
+    async (cartItemId: string) => {
+      await apiDelete(`/api/cart/items/${cartItemId}`);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const clear = useCallback(async () => {
+    await apiDelete('/api/cart');
+    setItems([]);
   }, []);
 
-  const removeItem = useCallback((productId: string) => {
-    setItems((prev) => prev.filter((i) => i.product.id !== productId));
-  }, []);
+  const value = useMemo<CartCtx>(() => {
+    const count = items.reduce((n, i) => n + i.quantity, 0);
+    const subtotal = items.reduce((n, i) => n + i.quantity * (i.sale_price ?? i.price), 0);
+    return { items, loading, count, subtotal, addItem, updateQuantity, removeItem, clear, refresh };
+  }, [items, loading, addItem, updateQuantity, removeItem, clear, refresh]);
 
-  const setQuantity = useCallback((productId: string, quantity: number) => {
-    setItems((prev) =>
-      quantity <= 0
-        ? prev.filter((i) => i.product.id !== productId)
-        : prev.map((i) => (i.product.id === productId ? { ...i, quantity } : i))
-    );
-  }, []);
-
-  const clearCart = useCallback(() => setItems([]), []);
-
-  const value = useMemo<CartContextValue>(() => {
-    const lines = items.map((i) => ({ price: i.product.price, quantity: i.quantity }));
-    const { subtotal, tax, total } = calcTotals(lines);
-    return {
-      items,
-      itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
-      subtotal,
-      tax,
-      total,
-      addItem,
-      removeItem,
-      setQuantity,
-      clearCart,
-    };
-  }, [items, addItem, removeItem, setQuantity, clearCart]);
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-export function useCart(): CartContextValue {
-  const ctx = useContext(CartContext);
+export function useCart(): CartCtx {
+  const ctx = useContext(Ctx);
   if (!ctx) throw new Error('useCart must be used within CartProvider');
   return ctx;
 }

@@ -7,203 +7,110 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
-import type { Profile } from '../types';
+import { apiGet, apiPost, apiPatch, apiPut, setToken, getToken, ApiError } from '../lib/api';
+import type { User } from '../types';
 
-interface SignUpInput {
-  fullName: string;
-  email: string;
-  phone: string;
-  password: string;
-}
-
-interface AuthResult {
-  error: string | null;
-  /** True when Supabase email confirmation is enabled — user must verify email before logging in. */
-  needsEmailConfirmation?: boolean;
-}
-
-interface AuthContextValue {
-  session: Session | null;
+interface AuthCtx {
   user: User | null;
-  profile: Profile | null;
-  isAdmin: boolean;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<AuthResult>;
-  signUp: (input: SignUpInput) => Promise<AuthResult>;
-  /** Re-send the signup confirmation email (for Option-B confirmation flow). */
-  resendConfirmation: (email: string) => Promise<string | null>;
-  signOut: () => Promise<void>;
-  updateProfile: (updates: {
-    full_name?: string;
-    phone?: string;
-    avatar_url?: string;
-  }) => Promise<string | null>;
-  refreshProfile: () => Promise<void>;
+  isAdmin: boolean;
+  login: (email: string, password: string) => Promise<User>;
+  register: (data: { full_name: string; email: string; phone: string; password: string }) => Promise<User>;
+  logout: () => void;
+  refresh: () => Promise<void>;
+  updateProfile: (data: Partial<Pick<User, 'full_name' | 'phone' | 'avatar_url'>>) => Promise<User>;
+  changePassword: (current: string, next: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+const Ctx = createContext<AuthCtx | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = useCallback(async (userId: string) => {
-    if (!isSupabaseConfigured) return;
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    if (error) {
-      console.error('Failed to load profile:', error.message);
-      return;
-    }
-    setProfile(data as Profile | null);
-  }, []);
-
   useEffect(() => {
-    if (!isSupabaseConfigured) {
+    if (getToken()) {
+      apiGet<{ user: User; addresses: unknown[] }>('/api/auth/me')
+        .then((r) => setUser(r.user))
+        .catch(() => setToken(null))
+        .finally(() => setLoading(false));
+    } else {
       setLoading(false);
+    }
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await apiPost<{ token: string; user: User }>('/api/auth/login', { email, password });
+    setToken(res.token);
+    setUser(res.user);
+    return res.user;
+  }, []);
+
+  const register = useCallback(
+    async (data: { full_name: string; email: string; phone: string; password: string }) => {
+      const res = await apiPost<{ token: string; user: User }>('/api/auth/register', data);
+      setToken(res.token);
+      setUser(res.user);
+      return res.user;
+    },
+    [],
+  );
+
+  const logout = useCallback(() => {
+    setToken(null);
+    setUser(null);
+  }, []);
+
+  const refresh = useCallback(async () => {
+    if (!getToken()) {
+      setUser(null);
       return;
     }
-
-    let mounted = true;
-
-    supabase.auth
-      .getSession()
-      .then(({ data }) => {
-        if (!mounted) return;
-        setSession(data.session);
-        if (data.session?.user) {
-          void loadProfile(data.session.user.id);
-        }
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-
-    const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
-        setSession(nextSession);
-        if (nextSession?.user) {
-          void loadProfile(nextSession.user.id);
-        } else {
-          setProfile(null);
-        }
-      }
-    );
-
-    return () => {
-      mounted = false;
-      subscription.subscription.unsubscribe();
-    };
-  }, [loadProfile]);
-
-  const notConfigured = (): AuthResult => ({
-    error:
-      'Backend is not configured yet — VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are missing. Contact the site administrator.',
-  });
-
-  const signIn = useCallback(async (email: string, password: string): Promise<AuthResult> => {
-    if (!isSupabaseConfigured) return notConfigured();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error) return { error: null };
-    if (error.message.toLowerCase().includes('failed to fetch')) {
-      return {
-        error:
-          'Cannot reach the Supabase server — check your internet connection, and that VITE_SUPABASE_URL is correct and the Supabase project is not paused.',
-      };
-    }
-    // Map common Supabase errors to actionable messages
-    if (error.message.includes('Email not confirmed')) {
-      return {
-        error:
-          'Your account exists, but your email is not confirmed yet. Please check your inbox for the confirmation link.',
-      };
-    }
-    if (error.message.includes('Invalid login credentials')) {
-      return { error: 'Wrong email or password.' };
-    }
-    return { error: error.message };
-  }, []);
-
-  const signUp = useCallback(async (input: SignUpInput): Promise<AuthResult> => {
-    if (!isSupabaseConfigured) return notConfigured();
-    const { data, error } = await supabase.auth.signUp({
-      email: input.email,
-      password: input.password,
-      options: {
-        data: { full_name: input.fullName, phone: input.phone },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    if (error) {
-      if (error.message.includes('already registered')) {
-        return { error: 'An account with this email already exists — try logging in.' };
-      }
-      return { error: error.message };
-    }
-    // Supabase with email confirmation ON returns a user but NO session.
-    const needsEmailConfirmation = Boolean(data.user) && !data.session;
-    return { error: null, needsEmailConfirmation };
-  }, []);
-
-  const resendConfirmation = useCallback(async (email: string) => {
-    if (!isSupabaseConfigured) return notConfigured().error;
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    });
-    return error ? error.message : null;
-  }, []);
-
-  const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    const r = await apiGet<{ user: User; addresses: unknown[] }>('/api/auth/me');
+    setUser(r.user);
   }, []);
 
   const updateProfile = useCallback(
-    async (updates: { full_name?: string; phone?: string; avatar_url?: string }) => {
-      if (!session?.user) return 'Not authenticated';
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', session.user.id);
-      if (error) return error.message;
-      await loadProfile(session.user.id);
-      return null;
+    async (data: Partial<Pick<User, 'full_name' | 'phone' | 'avatar_url'>>) => {
+      const res = await apiPut<{ user: User }>('/api/auth/me', data);
+      setUser(res.user);
+      return res.user;
     },
-    [session, loadProfile]
+    [],
   );
 
-  const refreshProfile = useCallback(async () => {
-    if (session?.user) await loadProfile(session.user.id);
-  }, [session, loadProfile]);
+  const changePassword = useCallback(async (current: string, next: string) => {
+    await apiPut('/api/auth/me/password', { current_password: current, new_password: next });
+  }, []);
 
-  const value = useMemo<AuthContextValue>(
+  const value = useMemo<AuthCtx>(
     () => ({
-      session,
-      user: session?.user ?? null,
-      profile,
-      isAdmin: profile?.role === 'admin',
+      user,
       loading,
-      signIn,
-      signUp,
-      resendConfirmation,
-      signOut,
+      isAdmin: user?.role === 'admin',
+      login,
+      register,
+      logout,
+      refresh,
       updateProfile,
-      refreshProfile,
+      changePassword,
     }),
-    [session, profile, loading, signIn, signUp, resendConfirmation, signOut, updateProfile, refreshProfile]
+    [user, loading, login, register, logout, refresh, updateProfile, changePassword],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
+export function useAuth(): AuthCtx {
+  const ctx = useContext(Ctx);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
+}
+
+export function isApiError(e: unknown): e is ApiError {
+  return e instanceof ApiError;
+}
+
+export function errorMessage(e: unknown): string {
+  return e instanceof Error ? e.message : 'Something went wrong';
 }
